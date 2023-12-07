@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { HiOutlineArrowCircleRight } from "react-icons/hi";
-
+import hospitalBackground from '../images/medecin-ordinateur.jpg';
 const fields = [
   {
     label: "First Name",
@@ -67,9 +67,18 @@ export default function Inscription() {
     // You can perform further actions with the form data here
   };
   return (
-    <div>
+    <div 
+    style={{
+      backgroundImage: `url(${hospitalBackground})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+     
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
       <div className="container mx-auto">
-        <div className="lg:w-7/12 pb-10 pt-5 w-full p-4 flex flex-wrap justify-center shadow-2xl my-20 rounded-md mx-auto">
+        <div className="lg:w-7/12 pb-10 pt-5 w-full p-4 flex flex-wrap justify-center shadow-md bg-white bg-opacity-50 my-20 rounded-md mx-auto">
           <div className="pb-5">
             <h1 className="text-3xl font-bold">Register Form</h1>
           </div>
@@ -97,7 +106,7 @@ export default function Inscription() {
                     placeholder={field.placeholder}
                   />
                   {errors[field.label.toLowerCase()] && (
-                    <span>This field is required</span>
+                    <span className="text-red-500">This field is required</span>
                   )}
                 </div>
               ))}
