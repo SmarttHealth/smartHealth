@@ -1,11 +1,12 @@
 const mongoose = require('mongoose')
 
-module.exports = mongoose.model('Users', {
+module.exports = mongoose.model('Medecin', {
     firstName: { type: String},
     lastName: { type: String},
-    email: { type: String},
     phone: { type: String},
     address: { type: String},
-    password: { type: String}
-    
+    specialite: {type: String},
+    id_compte: {
+        type: mongoose.Types.ObjectId, ref: "Compte"
+    }
     })
