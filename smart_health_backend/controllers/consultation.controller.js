@@ -1,21 +1,21 @@
 const db = require("../models/db")
-const UserCrud = require("../models/user.model")
+const Consultation = require("../models/consultation.model")
 const ObejectId = require("mongoose").Types.ObjectId
 
 
 exports.findAll = (req, res) =>{
-    UserCrud.find()
+    Consultation.find()
     .then(data => res.send(data))
     .catch(err => console.log(err))
 }
 
-exports.findByIdUser = (req, res) => {
+exports.findConsultation = (req, res) => {
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({
             error: 'given Object id is not valid : '+ req.params.id
         })
     else
-        UserCrud.findById(req.params.id)
+        Consultation.findById(req.params.id)
         .then(data => {
             if (data)
                 res.send(data)
@@ -27,59 +27,59 @@ exports.findByIdUser = (req, res) => {
         .catch(err => console.log(err))
 }
 
-exports.login = (req, res) => {
-    
-    const { email, password } = req.body;
-
-    UserCrud.findOne({ email, password })
-    .then(data => {
-        if (data) {
-            res.send(data);
-        } else {
-            res.status(404).json({
-                error: 'no record found'
-            });
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: 'internal server error'
-        });
-    });
-}
-
-exports.addUser = (req, res) => {
+exports.addConsultation = (req, res) => {
     if(req.body === null)
         res.status(400).json({
-        error:'given user null'
+        error:'given consultation null'
         })
     else
-        UserCrud.create(req.body)
+        Consultation.create(req.body)
         .then(data => res.status(201).json(data))
         .catch(err => console.log(err))
 }
 
-exports.updateUser = (req, res) =>{
-    if(ObejectId.isValid(req.params.id) == false)
-        res.status(400).json({
-            error: 'given Object id is not valid : '+ req.params.id
-        })
-    else
-        UserCrud.updateOne(req.params.id, req.body)
-        .then(data => res.json(data))
-        .catch(err => console.log(err))
-}
-
-exports.deleteUser = (req, res) =>{
+exports.updateConsultation = async (req, res) =>{
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({
             error: 'given Object id is not valid : '+ req.params.id
         })
     else{
-        const user = UserCrud.findById(req.params.id)
-        UserCrud.deleteOne(user)
+        const rdv = await Consultation.findByIdAndUpdate(req.params.id, req.body)
+        res.json(rdv)
+    }
+}
+
+exports.deleteConsultation = (req, res) =>{
+    if(ObejectId.isValid(req.params.id) == false)
+        res.status(400).json({
+            error: 'given Object id is not valid : '+ req.params.id
+        })
+    else{
+        Consultation.findByIdAndDelete(req.params.id)
         .then(data => res.json(data))
         .catch(err => console.log(err))
     }
 }
+
+
+exports.addDocumentsToConsultation = async (req, res) => {
+    const { id } = req.params;
+  const { documents } = req.body;
+
+  try {
+    // Vérifier si la consultation existe
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ error: 'Consultation non trouvée' });
+    }
+
+    // Ajouter les documents à la consultation existante
+    consultation.documents.push(...documents);
+    await consultation.save();
+
+    return res.status(200).json(consultation);
+  } catch (err) {
+    return res.status(500).json({ error: 'Erreur lors de l\'ajout des documents à la consultation' });
+  }
+};
+
