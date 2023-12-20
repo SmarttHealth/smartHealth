@@ -5,5 +5,6 @@ module.exports = mongoose.model("RDV",{
     date_RDV: { type: Date},
     Heure_debut_RDV: { type: String},
     Heure_fin_RDV: { type: String},
-    
+    id_patient: { type: mongoose.Types.ObjectId, ref: "Patient" },
+    id_medecin: { type: mongoose.Types.ObjectId, ref: "Medecin"}
 })

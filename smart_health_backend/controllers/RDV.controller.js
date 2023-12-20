@@ -1,21 +1,21 @@
 const db = require("../models/db")
-const Service = require("../models/service.model")
+const RDV = require("../models/RDV.model")
 const ObejectId = require("mongoose").Types.ObjectId
 
 
 exports.findAll = (req, res) =>{
-    Service.find()
+    RDV.find()
     .then(data => res.send(data))
     .catch(err => console.log(err))
 }
 
-exports.findService = (req, res) => {
+exports.findRDV = (req, res) => {
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({
             error: 'given Object id is not valid : '+ req.params.id
         })
     else
-        Service.findById(req.params.id)
+        RDV.findById(req.params.id)
         .then(data => {
             if (data)
                 res.send(data)
@@ -27,35 +27,35 @@ exports.findService = (req, res) => {
         .catch(err => console.log(err))
 }
 
-exports.addService = (req, res) => {
+exports.addRDV = (req, res) => {
     if(req.body === null)
         res.status(400).json({
         error:'given user null'
         })
     else
-        Service.create(req.body)
+        RDV.create(req.body)
         .then(data => res.status(201).json(data))
         .catch(err => console.log(err))
 }
 
-exports.updateService = (req, res) =>{
-    if(ObejectId.isValid(req.params.id) == false)
-        res.status(400).json({
-            error: 'given Object id is not valid : '+ req.params.id
-        })
-    else
-        Service.findByIdAndUpdate(req.params.id, req.body)
-        .then(data => res.json(data))
-        .catch(err => console.log(err))
-}
-
-exports.deleteService = (req, res) =>{
+exports.updateRDV = async (req, res) =>{
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({
             error: 'given Object id is not valid : '+ req.params.id
         })
     else{
-        Service.findByIdAndDelete(req.params.id)
+        const rdv = await RDV.findByIdAndUpdate(req.params.id, req.body)
+        res.json(rdv)
+    }
+}
+
+exports.deleteRDV = (req, res) =>{
+    if(ObejectId.isValid(req.params.id) == false)
+        res.status(400).json({
+            error: 'given Object id is not valid : '+ req.params.id
+        })
+    else{
+        RDV.findByIdAndDelete(req.params.id)
         .then(data => res.json(data))
         .catch(err => console.log(err))
     }
