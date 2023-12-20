@@ -1,45 +1,53 @@
-import React from "react";
+import React,{useEffect} from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import { HiOutlineArrowCircleRight } from "react-icons/hi";
 import hospitalBackground from '../images/medecin-ordinateur.jpg';
 const fields = [
   {
-    label: "First Name",
+    label: "firstName",
     type: "text",
     placeholder: "entrer your first name",
     required: true,
     gridCols: 1,
   },
   {
-    label: "Last Name",
+    label: "lastName",
     type: "text",
     placeholder: "entrer your last name",
     required: true,
     gridCols: 1,
   },
   {
-    label: "Email",
+    label: "email",
     type: "email",
     placeholder: "entrer your email",
     required: true,
     gridCols: 2,
   },
   {
-    label: "Phone",
+    label: "phone",
     type: "tel",
     placeholder: "Entrer your phone unmber",
     required: true,
-    gridCols: 2,
+    gridCols: 1,
   },
   {
-    label: "Address",
+    label: "birthday",
+    type: "date",
+    placeholder:"choisir votre date de naissance",
+    required: true,
+    gridCols: 1
+  },
+  {
+    label: "address",
     type: "text",
     placeholder: "Entrer your address",
     required: true,
     gridCols: 2,
   },
   {
-    label: "Password",
+    label: "password",
     type: "password",
     placeholder: "Enter your password",
     required: true,
@@ -62,10 +70,27 @@ export default function Inscription() {
     watch,
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data);
-    // You can perform further actions with the form data here
+  const onSubmit = async (data) => {
+    console.log(data)
+    try {
+      // Envoyer les données d'inscription à l'API
+      const response = await axios.post('http://localhost:8082/api/users/patient', data);
+      console.log("patient: ",response.data);
+      // Vous pouvez traiter la réponse ici, par exemple, rediriger l'utilisateur après l'enregistrement
+    } catch (error) {
+      // Gérer les erreurs, par exemple, afficher un message d'erreur à l'utilisateur
+      console.error("Inscription failed", error);
+    }
   };
+  useEffect(() => {
+    // Désactiver le défilement lorsque le composant est monté
+    document.body.classList.add('overflow-hidden');
+
+    // Réactiver le défilement lorsque le composant est démonté
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, []);
   return (
     <div 
     style={{
@@ -78,7 +103,7 @@ export default function Inscription() {
       justifyContent: 'center',
     }}>
       <div className="container mx-auto">
-        <div className="lg:w-7/12 pb-10 pt-5 w-full p-4 flex flex-wrap justify-center shadow-md bg-white bg-opacity-50 my-20 rounded-md mx-auto">
+        <div className="lg:w-6/12 pb-8 pt-4 w-full p-2  sm:p-4 flex flex-wrap justify-center shadow-md bg-white bg-opacity-50 mt-20 my-10 mx-auto rounded-md">
           <div className="pb-5">
             <h1 className="text-3xl font-bold">Register Form</h1>
           </div>
@@ -96,7 +121,7 @@ export default function Inscription() {
                 >
                   <label className="font-semibold">{field.label}</label>
                   <input
-                    {...register(field.label.toLowerCase(), {
+                    {...register(field.label, {
                       required: field.required,
                     })}
                     className={`border border-gray-300 text-sm font-semibold mb-1 max-w-full w-full outline-none rounded-md m-0 py-3 px-4 md:py-3 md:px-4 md:mb-0 focus:border-red-500 ${

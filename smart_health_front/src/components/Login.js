@@ -1,6 +1,33 @@
-import React from 'react';
+import React,{useState} from 'react';
+import  axios  from 'axios';
+import {useNavigate} from 'react-router-dom'
 import hospitalBackground from '../images/bg_login.jpg';
 export default function Login() {
+    const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:8082/api/users/login', {
+        email,
+        password,
+      });
+      console.log('Response from server:', response.data.userData);
+      // Save the JWT token in localStorage
+      localStorage.setItem('user', JSON.stringify(response.data.userData));
+      navigate('/patient')
+  
+      // Handle the response, e.g., redirect the user or set authentication state
+      console.log(response.data);
+  
+    } catch (error) {
+      // Handle errors, e.g., show an error message to the user
+      console.error('Login failed', error);
+    }
+  };
+  
     return (
         <div 
     style={{
@@ -23,35 +50,34 @@ export default function Login() {
                     <div className="mb-2">
                         <label
                             for="email"
-                            className="block text-sm font-semibold text-gray-800"
+                            className="block text-sm text-left font-semibold text-gray-800"
                         >
                             Email
                         </label>
                         <input
                             type="email"
-                            className="block w-full px-4 py-2 mt-2 text-black-700 bg-white border rounded-md focus:border-red-400 focus:ring-red-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="block w-full lg:w-full px-20 py-2 mt-2 text-black-700 bg-white border rounded-md focus:border-red-400 focus:ring-red-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         />
                     </div>
                     <div className="mb-2">
                         <label
                             for="password"
-                            className="block text-sm font-semibold text-gray-800"
+                            className="block text-sm text-left font-semibold text-gray-800"
                         >
                             Password
                         </label>
                         <input
                             type="password"
-                            className="block w-full px-4 py-2 mt-2 text-black-700 bg-white border rounded-md focus:border-red-400 focus:ring-red-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="block w-full lg:w-full px-5 py-2 mt-2 text-black-700 bg-white border rounded-md focus:border-red-400 focus:ring-red-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         />
                     </div>
-                    <a
-                        href="#"
-                        className="text-xs text-black-600 hover:underline"
-                    >
-                        Forget Password?
-                    </a>
+                    
                     <div className="mt-6">
-                        <button className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-white hover:text-red-500">
+                        <button
+                        onClick={handleLogin}
+                         className="w-full px-2 py-2 tracking-wide text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-white hover:text-red-500">
                             Login
                         </button>
                     </div>

@@ -56,4 +56,9 @@ a, button {
 .btn-hover {
   @apply relative overflow-hidden;
 }
+.primary-color{
+  --color-primary: red;
+  --color-secondary: 111 114 185;
+  background-color: pink;
+}
 
