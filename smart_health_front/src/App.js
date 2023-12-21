@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
 import './App.css';
-import Inscription from './components/Inscription';
-import Home from './components/Home';
-import Navbar from './components/Navbar'
-import Login from './components/Login';
-import Home from './components/home/Home';
-import Navbar from './components/home/Navbar';
+import Inscription from './pages/Inscription';
+import Login from './pages/Login';
+import Home from './pages/Home';
+
+import ServiceDetails from './pages/ServiceDetails';
+import Patient from './pages/Patient';
 
 
 function App() {
@@ -13,13 +13,16 @@ function App() {
     <Router>
       <div className="App">
          
-       <Navbar/>
-        <Navbar/>
+      
+   
         <Routes>
           
        <Route path='/inscription' element={<Inscription/>}/> 
          <Route path='/home' element={<Home/>}/>
+         <Route path="/services/:title" element={<ServiceDetails/>} />
+         <Route path='/patient' element={<Patient/>}/> 
           <Route path='/login' element={<Login/>}/>
+          <Route path='/services' element={<ServiceDetails/>}/>
         </Routes>
       </div>
     </Router>

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-scroll";
-import Button from "../layout/Button";
+
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import Contact from "../models/Contact";
+import Contact from "./Contact";
 import logo from "../../images/logoss.PNG"
 const Navbar = () => {
   const [menu, setMenu] = useState(false);

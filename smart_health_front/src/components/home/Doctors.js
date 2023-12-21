@@ -1,4 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import axios from "axios";
+import { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -11,38 +13,22 @@ import imgDoc4 from  "../../images/doc4.jpg"
 import imgDoc5 from  "../../images/doc5.jpg"
 import imgDoc6 from  "../../images/doc6.jpg"
 const Doctors = () => {
-  const data = [
-    {
-      img: imgDoc1,
-      name: "Dr. Serena Mitchell",
-      specialties: "Orthopedic Surgeon",
-    },
-    {
-      img: imgDoc2,
-      name: "Dr. Julian Bennett",
-      specialties: "Cardiologist",
-    },
-    {
-      img: imgDoc3,
-      name: "Dr. Camila Rodriguez",
-      specialties: "Pediatrician",
-    },
-    {
-      img:imgDoc4,
-      name: "Dr. Victor Nguyen",
-      specialties: "Neurologist",
-    },
-    {
-      img: imgDoc5,
-      name: "Dr. Ethan Carter",
-      specialties: "Dermatologist",
-    },
-    {
-      img: imgDoc6,
-      name: "Dr. Olivia Martinez",
-      specialties: "Ophthalmologist",
-    },
-  ];
+  const [doctors,setDoctors]=useState([]);
+  useEffect(()=>{
+    const getDoctors=async ()=>{
+      try{
+        const listeDoctors=await axios.get("http://localhost:8082/api/users/medecin/")
+        setDoctors(listeDoctors.data);
+        console.log("doctors",listeDoctors.data)
+      }
+      catch(err){
+        console.log(err)
+      }
+    };
+    getDoctors();
+  },[])
+
+    
 
   const slider = useRef(null);
 
@@ -85,7 +71,7 @@ const Doctors = () => {
       </div>
       <div className=" mt-5">
         <Slider ref={slider} {...settings}>
-          {data.map((e, index) => (
+          {doctors.map((e, index) => (
             <div
               className="h-[350px] text-black rounded-xl shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] mb-2 cursor-pointer"
               key={index}
