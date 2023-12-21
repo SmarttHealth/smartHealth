@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const ServiceController = require("../controllers/service.controller")
+const RDVController = require("../controllers/RDV.controller")
 const verifyJWT = require("../middleware/verifyJWT")
 
 router.use(function(req, res, next) {
@@ -11,10 +11,10 @@ router.use(function(req, res, next) {
 
 //router.use(verifyJWT)
 
-    router.get("/", ServiceController.findAll);
-    router.post("/", ServiceController.addService);
-    router.get("/:id",ServiceController.findService);
-    router.delete("/:id", ServiceController.deleteService);
-    router.put("/:id", ServiceController.updateService);
+    router.get("/", RDVController.findAll);
+    router.post("/", RDVController.addRDV);
+    router.get("/:id",RDVController.findRDV);
+    router.delete("/:id", RDVController.deleteRDV);
+    router.put("/:id", RDVController.updateRDV);
     
 module.exports = router;
