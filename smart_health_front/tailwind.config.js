@@ -83,6 +83,9 @@ module.exports = {
             width: "100%"
           }
         },
+        height: {
+          '128': '32px',
+        },
         blink: {
           "50%": {
             borderColor: "transparent"
@@ -120,6 +123,7 @@ module.exports = {
         '600': '600ms',
        }
     },
+    
   },
   variants: {
     extend: {},
