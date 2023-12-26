@@ -1,5 +1,7 @@
 const db = require("../models/db")
 const RDV = require("../models/RDV.model")
+const Patient = require("../models/patient.model")
+const Medecin = require("../models/medecin.model")
 const ObejectId = require("mongoose").Types.ObjectId
 
 
@@ -8,6 +10,29 @@ exports.findAll = (req, res) =>{
     .then(data => res.send(data))
     .catch(err => console.log(err))
 }
+
+exports.findAllRDVDetails = async (req, res) => {
+    try {
+      const rdvs = await RDV.find();
+      const rdvDetails = [];
+  
+      for (const rdv of rdvs) {
+        const patient = await Patient.findById(rdv.id_patient);
+        const medecin = await Medecin.findById(rdv.id_medecin);
+  
+        rdvDetails.push({
+          ...rdv._doc,
+          patient: patient ? { id: patient._id, firstName: patient.firstName, lastName: patient.lastName, contact: patient.phone } : null,
+          medecin: medecin ? { id: medecin._id, firstName: medecin.firstName, lastName: medecin.lastName } : null,
+        });
+      }
+  
+      res.status(200).json(rdvDetails);
+    } catch (err) {
+      console.error('Error fetching rdvs:', err);
+      res.status(500).json({ error: 'Erreur lors de la récupération des rdvs' });
+    }
+  };
 
 exports.findRDV = (req, res) => {
     if(ObejectId.isValid(req.params.id) == false)

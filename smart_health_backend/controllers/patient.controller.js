@@ -30,21 +30,22 @@ exports.findUser = (req, res) => {
 }
 
 exports.addUser =async (req, res) => {
+    console.log("Received data:", req.body);
     if(req.body === null)
         res.status(400).json({
         error:'given user null'
         })
     else{
-        const { email, password, birthday } = req.body;
+        const { email, password } = req.body;
         const role = "Patient"
-        const dateString = birthday;
-        const parts = dateString.split('/'); // Séparer la chaîne par "/"
-        const day = parseInt(parts[0], 10); // Récupérer le jour
-        const month = parseInt(parts[1], 10) - 1; // Récupérer le mois (soustraire 1 car les mois commencent à 0)
-        const year = parseInt(parts[2], 10); // Récupérer l'année
+        //const dateString = birthday;
+        //const parts = dateString.split('/'); // Séparer la chaîne par "/"
+       // const day = parseInt(parts[0], 10); // Récupérer le jour
+       // const month = parseInt(parts[1], 10) - 1; // Récupérer le mois (soustraire 1 car les mois commencent à 0)
+        //const year = parseInt(parts[2], 10); // Récupérer l'année
 
         // Créer un objet Date avec les parties extraites
-        const birthdayy = new Date(year, month, day);
+       // const birthdayy = new Date(year, month, day);
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
         CompteCrud.create({email,"password": hashedPassword, role})
@@ -52,8 +53,8 @@ exports.addUser =async (req, res) => {
             const compteId = CptData._id;
             const patientData = {
                 ...req.body,
-                id_compte: compteId,
-                birthday: birthdayy
+                id_compte: compteId
+                //birthday: birthdayy
             }; 
             UserCrud.create(patientData)
             .then(data => res.status(201).json(data))
@@ -115,3 +116,30 @@ exports.deleteUser = (req, res) =>{
         
     }
 }
+exports.patientWithInactiveState = async (req, res) => {
+    try {
+      const patients = await UserCrud.find();
+      const result = [];
+      for (const patient of patients) {
+        const compte = await CompteCrud.findById(patient.id_compte);
+  
+        if (compte && compte.active === false) {
+          result.push({
+            _id: patient._id,
+            firstName: patient.firstName,
+            lastName: patient.lastName,
+            phone: patient.phone,
+            address: patient.address,
+            birthday: patient.birthday,
+            id_compte: patient.id_compte,
+          });
+        }
+      }
+  
+      res.send(result);
+    } catch (err) {
+      console.error('Error during findAll:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+  

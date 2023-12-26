@@ -11,5 +11,6 @@ router.use(function(req, res, next) {
     router.post("/login", CompteController.login);
     router.post("/logout", CompteController.logout);
     router.get("/refresh", CompteController.refresh);
+    router.put("/activate", CompteController.activateAccount);
 
 module.exports = router;
