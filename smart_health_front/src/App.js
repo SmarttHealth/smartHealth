@@ -7,16 +7,28 @@ import Login from './components/Login';
 import Assistant from './components/Assistant/Assistant';
 import Patient from './components/patient/Patient';
 import AuthGuard from './components/AuthGuard';
+import Inscription from './pages/Inscription';
+import Login from './pages/Login';
+import Home from './pages/Home';
+
+import ServiceDetails from './pages/ServiceDetails';
+import Patient from './pages/Patient';
 
 function App() {
   return (
     <Router>
       <div className="App">
-        <Navbar/>
+         
+      
+   
         <Routes>
-          <Route path='/' element={<Home/>}/>
-          <Route path='/inscription' element={<Inscription/>}/>
+          
+       <Route path='/inscription' element={<Inscription/>}/> 
+         <Route path='/home' element={<Home/>}/>
+         <Route path="/services/:title" element={<ServiceDetails/>} />
+         <Route path='/patient' element={<Patient/>}/> 
           <Route path='/login' element={<Login/>}/>
+
           <Route path='/assistant' element={
           <AuthGuard>
             <Assistant/>
@@ -27,6 +39,7 @@ function App() {
             <Patient/>
             </AuthGuard>
           }/>
+          <Route path='/services' element={<ServiceDetails/>}/>
         </Routes>
       </div>
     </Router>
