@@ -6,6 +6,8 @@ import Navbar from './components/Navbar'
 import Login from './components/Login';
 import Assistant from './components/Assistant/Assistant';
 import Patient from './components/patient/Patient';
+import AuthGuard from './components/AuthGuard';
+
 function App() {
   return (
     <Router>
@@ -15,8 +17,16 @@ function App() {
           <Route path='/' element={<Home/>}/>
           <Route path='/inscription' element={<Inscription/>}/>
           <Route path='/login' element={<Login/>}/>
-          <Route path='/assistant' element={<Assistant/>}/>
-          <Route path='/patient' element={<Patient/>}/>
+          <Route path='/assistant' element={
+          <AuthGuard>
+            <Assistant/>
+            </AuthGuard>
+          }/>
+          <Route path='/patient' element={
+          <AuthGuard>
+            <Patient/>
+            </AuthGuard>
+          }/>
         </Routes>
       </div>
     </Router>

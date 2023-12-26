@@ -52,9 +52,9 @@ const Navbar = () => {
     setDropdown(!dropdown);
   };
   const handleLogout = () => {
-    // Ajoutez votre logique de déconnexion ici
-    // Par exemple, effacer les données utilisateur du localStorage et rediriger vers la page de connexion
     localStorage.removeItem('user');
+    localStorage.removeItem('statusCode');
+
     setUserData(null);
     navigate('/login');
   };
