@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
-import imgDoc6 from  "../images/doc6.jpg";
+import imgDoc6 from "../images/doc6.jpg";
 import DashboardContent from "../components/patient/DashboardContent";
 import ConsultationsContent from "../components/patient/ConsultationsContent";
 import HistoriqueContent from "../components/patient/HistoriqueContent";
 import RendezVousContent from "../components/patient/RendezVousContent";
 import ServiceSuiviContent from "../components/patient/ServiceSuiviContent";
 import ProfileContent from '../components/patient/ProfileContent';
+import StatsPatient from "../components/patient/StatsPatient";
+import Navbar from '../components/home/Navbar';
 const Patient = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState('dashboard');
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="font-bold grid grid-cols-5 max-auto mx-auto border-x-2 border-gray-100">
-      <div className="col-span-1 h-screen px-7 py-8 bg-blue-600 border-r border-r-gray-100">
-        <div className="rounded-full overflow-hidden mb-6">
+    
+      <div>
+        <Navbar/>
+    <div className="  font-bold flex flex-col  pt-20 lg:flex-row text-blue-800 ">
+    
+      {/* Partie gauche (menu) */}
+      <div className="lg:flex-none w-full lg:w-1/5 h-screen px-7 py-8 bg-white border-r border-r-gray-100">
+        <div className="rounded-full overflow-hidden  mb-6">
           <img
-            src={imgDoc6}
+            src="https://source.unsplash.com/MP0IUfwrn0A"
             alt="Patient Image"
             className="w-25 h-25 object-cover rounded-full mx-auto"
           />
@@ -23,18 +35,9 @@ const Patient = () => {
           <span>kaoutar</span>
         </div>
 
-        <div className="mt-12">
-          <ul className="flex flex-col space-y-3 text-gray-500 text-sm sidebar-menu">
-            <li className={`flex space-x-3 items-center px-6 py-3 rounded-lg ${activeSection === 'dashboard' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('dashboard')}>
-              <span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </span>
-              <span>Dashboard</span>
-            </li>
-            <li className={`flex space-x-3 items-center px-6 py-3 rounded-lg ${activeSection === 'rendezvous' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('rendezvous')}>
+        <div className="mt-12 ">
+          <ul className="flex flex-col space-y-3 text-gray-500 text-sm sidebar-menu 0">
+          <li className={`flex space-x-3 items-center   px-6 py-3 rounded-lg ${activeSection === 'rendezvous' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('rendezvous')}>
               <span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -61,7 +64,7 @@ const Patient = () => {
               </span>
               <span>Service Suivi</span>
             </li>
-            <li className={`flex space-x-3 items-center px-6 py-3 rounded-lg ${activeSection === 'historique' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('historique')}>
+            {/* <li className={`flex space-x-3 items-center px-6 py-3 rounded-lg ${activeSection === 'historique' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('historique')}>
               <span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -69,7 +72,7 @@ const Patient = () => {
                 </svg>
               </span>
               <span>Historique</span>
-            </li>
+            </li> */}
             <li className={`flex space-x-3 items-center px-6 py-3 rounded-lg ${activeSection === 'consultations' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('consultations')}>
               <span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,20 +86,23 @@ const Patient = () => {
           </ul>
         </div>
       </div>
+          
+      
 
-      <div className="col-span-4 p-8">
+      {/* Partie droite (contenu) */}
+      <div className="flex-grow p-8 bg-slate-300 ">
         {/* Contenu dynamique basé sur la section active */}
-        {activeSection === 'dashboard' && <DashboardContent />}
-        {activeSection === 'rendezvous' && <RendezVousContent />}
-        {activeSection === 'profile' && <ProfileContent />}
-        {activeSection === 'serviceSuivi' && <ServiceSuiviContent />}
-        {activeSection === 'historique' && <HistoriqueContent />}
-        {activeSection === 'consultations' && <ConsultationsContent />}
+        {activeSection === 'dashboard' && <div><StatsPatient/><DashboardContent /></div>}
+        {activeSection === 'rendezvous' && <div><StatsPatient/><RendezVousContent /></div>}
+        {activeSection === 'profile' && <div><StatsPatient/><ProfileContent /></div>}
+        {activeSection === 'serviceSuivi' && <div><StatsPatient/><ServiceSuiviContent /></div>}
+        {activeSection === 'historique' && <div><StatsPatient/><HistoriqueContent /></div>}
+        {activeSection === 'consultations' && <div><StatsPatient/><ConsultationsContent /></div>}
         {/* ... (ajoutez d'autres sections ici) */}
       </div>
     </div>
+    </div>
   );
 }
-
 
 export default Patient;

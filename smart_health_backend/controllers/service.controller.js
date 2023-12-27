@@ -1,7 +1,7 @@
 const db = require("../models/db")
 const Service = require("../models/service.model")
 const ObejectId = require("mongoose").Types.ObjectId
-
+const Doctor = require("../models/medecin.model")
 
 exports.findAll = (req, res) =>{
     Service.find()
@@ -60,3 +60,31 @@ exports.deleteService = (req, res) =>{
         .catch(err => console.log(err))
     }
 }
+exports.findDoctorsForService = async (req, res) => {
+    try {
+      const serviceId = req.params.id;
+  
+      if (!ObejectId.isValid(serviceId)) {
+        return res.status(400).json({
+          error: 'Given Object ID is not valid: ' + serviceId,
+        });
+      }
+  
+      const service = await Service.findById(serviceId);
+  
+      if (!service) {
+        return res.status(404).json({
+          error: 'No record with the given ID: ' + serviceId,
+        });
+      }
+  
+      const doctors = await Doctor.find({ _id: { $in: service.medecins } });
+  
+      res.json(doctors);
+    } catch (error) {
+      console.error('Error fetching doctors for service:', error);
+      res.status(500).json({
+        error: 'Internal Server Error',
+      });
+    }
+  };

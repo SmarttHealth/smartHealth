@@ -18,14 +18,13 @@ function App() {
   return (
     <Router>
       <div className="App">
-         
-      
+        
    
         <Routes>
           
        <Route path='/inscription' element={<Inscription/>}/> 
          <Route path='/home' element={<Home/>}/>
-         <Route path="/services/:title" element={<ServiceDetails/>} />
+         <Route path="/services/:id" element={<ServiceDetails/>} />
          <Route path='/patient' element={<Patient/>}/> 
           <Route path='/login' element={<Login/>}/>
 
@@ -40,6 +39,7 @@ function App() {
             </AuthGuard>
           }/>
           <Route path='/services' element={<ServiceDetails/>}/>
+
         </Routes>
       </div>
     </Router>

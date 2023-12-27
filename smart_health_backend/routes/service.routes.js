@@ -16,5 +16,5 @@ router.use(function(req, res, next) {
     router.get("/:id",ServiceController.findService);
     router.delete("/:id", ServiceController.deleteService);
     router.put("/:id", ServiceController.updateService);
-    
+    router.get('/:id/doctors', ServiceController.findDoctorsForService);
 module.exports = router;
