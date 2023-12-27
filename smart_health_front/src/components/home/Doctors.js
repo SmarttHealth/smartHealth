@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaArrowLeft } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
-import imgDoc1 from  "../../images/doc1.jpg"
+
 import imgDoc2 from  "../../images/doc2.jpg"
 import imgDoc3 from  "../../images/doc3.jpg"
 import imgDoc4 from  "../../images/doc4.jpg"
@@ -78,15 +78,15 @@ const Doctors = () => {
             >
               <div>
                 <img
-                  src={e.img}
+                  src={`/doctors/${e.image}.jpg`}
                   alt="img"
                   className=" h-56 rounded-t-xl w-full"
                 />
               </div>
 
               <div className=" flex flex-col justify-center items-center">
-                <h1 className=" font-semibold text-xl pt-3">{e.name}</h1>
-                <h3 className="pb-2 ">{e.specialties}</h3>
+                <h1 className=" font-semibold text-xl pt-3">{e.firstName}</h1>
+                <h3 className=" ">{e.specialite}</h3>
               </div>
             </div>
           ))}

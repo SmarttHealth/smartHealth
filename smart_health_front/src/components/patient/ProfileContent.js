@@ -1,19 +1,52 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import axios from "axios"
 const Profile = () => {
   const [profile, setProfile] = useState({
-    firstName: 'Jane',
-    lastName: 'Doe',
-    phone: '123-456-7890',
-    address: '123 Main St, City',
-    birthday: '1990-01-01',
+    firstName: 'kaoutar',
+    lastName: 'bouarif',
+    phone: '089987889',
+    address: 'Marrakech',
+    birthday: '2001/04/08',
     image: 'https://source.unsplash.com/MP0IUfwrn0A',
   });
 
+  useEffect(() => {
+    const fetchPatientProfile = async () => {
+      try {
+        // 1. Récupérer les données du patient depuis le localStorage
+        const user = localStorage.getItem('user');
+        if (user) {
+          
+
+          // 2. Extraire l'ID du patient
+          const patientId = user.id; // Assurez-vous que votre structure de données contient l'ID
+
+          // 3. Utiliser l'ID pour récupérer les détails du patient depuis MongoDB
+          const response = await axios.get(`http://localhost:8082/api/patients/${patientId}`);
+          const patientData = response.data;
+
+          setProfile({
+            firstName: patientData.firstName,
+            lastName: patientData.lastName,
+            phone: patientData.phone,
+            address: patientData.address,
+            birthday: patientData.birthday,
+            image: patientData.image || 'https://source.unsplash.com/MP0IUfwrn0A',
+          });
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération du profil du patient:', error);
+      }
+    };
+
+    fetchPatientProfile();
+  }, []); // Le tableau vide signifie que cela ne s'exécute qu'une fois après le montage du composant
+
   const handleUpdateProfile = () => {
-    // Mettez à jour le profil ici (vous pouvez utiliser une API, etc.)
+    // Mettez à jour le profil (vous pouvez utiliser une API, etc.)
     console.log('Profil mis à jour !', profile);
   };
+
 
   return (
     <div className="max-w-4xl flex items-center h-auto lg:h-screen flex-wrap mx-auto my-32 lg:my-0">
@@ -79,17 +112,14 @@ const Profile = () => {
             />
           </div>
 
-          {/* <div className="w-full p-8 mx-2 flex justify-center">
-            <img id="showImage" className="max-w-xs w-32 items-center border" src={profile.image} alt="Profile" />
-          </div> */}
+          {/* Ajouter d'autres champs selon vos besoins */}
 
           <div className="pt-12 pb-8">
-            <button className="bg-blue-700 hover:bg-blue-900  text-white font-bold py-2 px-4 rounded-full" onClick={handleUpdateProfile}>
+            <button className="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-full" onClick={handleUpdateProfile}>
               Update Profile
             </button>
           </div>
         </div>
-        
       </div>
 
       <div className="w-full lg:w-2/5">

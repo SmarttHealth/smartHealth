@@ -6,6 +6,7 @@ module.exports = mongoose.model('Patient', {
     phone: { type: String},
     address: { type: String},
     birthday: {type: Date},
+    image:{type:String},
     id_compte: {
         type: mongoose.Types.ObjectId, ref: "Compte"
     }

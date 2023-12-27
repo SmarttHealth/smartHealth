@@ -26,7 +26,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className=" fixed w-full z-10 text-blue">
+    <div className=" fixed w-full z-100 text-blue z-50">
       <div>
         <div className=" flex flex-row justify-between p-5 md:px-32 px-5 bg-white shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]">
           <div className=" flex flex-row items-center cursor-pointer">
