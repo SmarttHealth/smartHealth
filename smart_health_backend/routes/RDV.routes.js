@@ -9,9 +9,10 @@ router.use(function(req, res, next) {
     next();
 });
 
-//router.use(verifyJWT)
+router.use(verifyJWT)
 
     router.get("/", RDVController.findAll);
+    router.get("/rdvs", RDVController.findAllRDVDetails);
     router.post("/", RDVController.addRDV);
     router.get("/:id",RDVController.findRDV);
     router.delete("/:id", RDVController.deleteRDV);

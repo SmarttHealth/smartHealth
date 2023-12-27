@@ -3,6 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser")
 const connectDb = require("./models/db")
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const PatientRoutes = require("./routes/patient.routes")
 const MedecinRoutes = require("./routes/medecin.routes")
@@ -23,6 +24,9 @@ app.use('/api/service', ServiceRoutes)
 app.use('/api/users', CompteRoutes)
 app.use('/api/RDV', RDVRoutes)
 app.use('/api/consultation', ConsultationRoutes)
+// Serve static files from the '../../smart_health_front/public' directory
+app.use('/public', express.static(path.join(__dirname, '../../smart_health_front/public')));
+
 connectDb()
     .then(()=>{
         console.log("db connection succeeded");

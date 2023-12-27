@@ -8,23 +8,20 @@ import service1 from '../images/serviceCardiologie.jpg';
 import '../styles/css/tailwindcss.css';
 
 const Services = () => {
-  const services = [
-    {
-      image: service1,
-      title: 'Service 1',
-      description: 'Description du service 1.',
-    },
-    {
-      image: service1,
-      title: 'Service 2',
-      description: 'Description du service 2.',
-    },
-    {
-      image: service1,
-      title: 'Service 3',
-      description: 'Description du service 3.',
-    },
-  ];
+  const [services,setservices]=useState([]);
+  useEffect(()=>{
+    const getDoctors=async ()=>{
+      try{
+        const listeServices=await axios.get("http://localhost:8082/api/service/")
+        setservices(listeServices.data);
+        console.log("services",listeServices.data)
+      }
+      catch(err){
+        console.log(err)
+      }
+    };
+    getDoctors();
+  },[])
 
   const settings = {
     dots: true,
@@ -57,8 +54,8 @@ const Services = () => {
                       <img src={service.image} alt={`Service ${index + 1}`} className="max-w-full max-h-full" />
                     </div>
                     <div className="service_content py-5 px-8 relative">
-                      <h4 className="service_title text-xl md:text-2xl">{service.title}</h4>
-                      <p className="mt-2">{service.description}</p>
+                      <h4 className="service_title text-xl md:text-2xl">{service.nameService}</h4>
+                      <p className="mt-2">{service.descService}</p>
                     </div>
                   </div>
                 </div>

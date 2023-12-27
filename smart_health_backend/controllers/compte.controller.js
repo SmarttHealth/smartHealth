@@ -8,7 +8,9 @@ const jwt = require("jsonwebtoken")
 require('dotenv').config();
 
 exports.login = async (req, res) => {
+    console.log("data from front: ",req)
     const { email, password } = req.body
+
     if (!email || !password) {
     return res.status (400).json({ message: 'All fields are required' })
     }
@@ -26,7 +28,7 @@ exports.login = async (req, res) => {
         }
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1m' }
+        { expiresIn: '1d' }
     )
     const refreshToken = jwt.sign(
         { "email": foundUser.email},
@@ -61,7 +63,8 @@ exports.login = async (req, res) => {
         // Ajout de l'accessToken aux informations utilisateur
         userData = {
             ...userData.toObject(),
-            accessToken
+            accessToken,
+            role:foundUser.role
         }
 
         res.json({ userData });
@@ -111,3 +114,28 @@ exports.logout = (req, res) => {
         secure: true })
     res.json({ message: 'Cookie cleared' })
 }
+exports.activateAccount = async (req, res) => {
+    const { accountId } = req.body;
+  
+    try {
+      // Recherche du compte par son ID
+      const foundAccount = await Compte.findById(accountId);
+  
+      // Vérifie si le compte existe
+      if (!foundAccount) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+  
+      // Met à jour l'attribut 'active' à true
+      foundAccount.active = true;
+  
+      // Sauvegarde les modifications dans la base de données
+      await foundAccount.save();
+  
+      // Réponse réussie
+      res.json({ message: "Account activated successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };

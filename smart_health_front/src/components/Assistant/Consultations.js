@@ -1,215 +1,253 @@
-import React from 'react'
+  import React, { useState, useEffect, useRef } from 'react';
+  import axios from 'axios';
+  import { getConsultationsDetails, getDoctors, getPatients, getPatientsInactives } from '../Api';
 
-const Consultations = () => {
-  return (
-    <div class="mt-4 mx-4">
-            <div class=" ml-60 overflow-hidden rounded-lg shadow-xs">
-              <div class="w-full overflow-x-auto">
-              <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">Consultations</h2>
-            <div className="flex space-x-2">
-                  
-<button id="dropdownDelayButton" data-dropdown-toggle="dropdownDelay" data-dropdown-delay="500" data-dropdown-trigger="hover" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Select patient <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-</svg>
-</button>
-<div id="dropdownDelay" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDelayButton">
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
-      </li>
-    </ul>
-</div>
+  const Consultations = () => {
+    const [doctors, setDoctors] = useState([]);
+    const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [consultations, setConsultations] = useState(null);
+    const [filteredConsultations, setFilteredConsultations] = useState(null);
 
-<button id="dropdownDelayButton" data-dropdown-toggle="dropdownDelay" data-dropdown-delay="500" data-dropdown-trigger="hover" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm ml-4 mr-10 px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Select doctor <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-</svg>
-</button>
-<div id="dropdownDelay" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDelayButton">
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
-      </li>
-    </ul>
-</div>
-</div>
-</div>
+
+
+    const [patients, setPatients] = useState([]);
+    const [isPatientDropdownOpen, setIsPatientDropdownOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const fileInputRef = useRef(null);
+
+
+
+    useEffect(() => {
+      // Effect to fetch the list of doctors from the backend
+      const fetchDoctors = async () => {
+        try {
+          const response = await getDoctors();
+          setDoctors(response.data); 
+          console.log("liste des medecins: ",doctors);
+        } catch (error) {
+          console.error('Error fetching doctors:', error);
+        }
+      };
+      const fetchPatients = async () => {
+        try {
+          const allPatientsResponse = await getPatients();
+          const inactivePatientsResponse = await getPatientsInactives();
+          
+          // Get ids of inactive patients
+          const inactivePatientIds = inactivePatientsResponse.data.map(inactivePatient => inactivePatient._id);
+
+          // Filter out inactive patients
+          const activePatients = allPatientsResponse.data.filter(patient => {
+            return !inactivePatientIds.includes(patient._id);
+          });
+
+          setPatients(activePatients);
+        } catch (error) {
+          console.error('Error fetching patients:', error);
+        }
+      };
+      const fetchConsultations = async () => {
+        try {
+          const response = await getConsultationsDetails();
+      
+          if (response.status === 200) {
+            setConsultations(response.data);
+            setFilteredConsultations(response.data);
+            console.log("consultation 👩 ", consultations);
+          } else {
+            console.error('Échec de la récupération des consultations');
+          }
+        } catch (error) {
+          console.error('Error fetching consultations: ', error);
+        }
+      };
+      
+      fetchPatients();
+      fetchDoctors();
+      fetchConsultations();
+    }, []);
+    useEffect(() => {
+      const filterConsultations = () => {
+        let filtered = consultations;
+
+        if (selectedPatient) {
+          filtered = filtered.filter(consultation => consultation.patient && consultation.patient.id === selectedPatient._id);
+        }
+    
+        if (selectedDoctor) {
+          filtered = filtered.filter(consultation => consultation.medecin && consultation.medecin.id === selectedDoctor._id);
+        }
+
+        setFilteredConsultations(filtered);
+      };
+
+      filterConsultations();
+    }, [selectedPatient, selectedDoctor, consultations]);
+
+    const handlePatientSelect = (patient) => {
+      setSelectedPatient(patient);
+      setIsPatientDropdownOpen(false);
+    };
+    const handleDoctorSelect = (doctor) => {
+      setSelectedDoctor(doctor);
+      setIsPatientDropdownOpen(false);
+    };
+    const handleFileSelect = (consultation, file) => {
+      if (file) {
+        const formData = new FormData();
+        formData.append('files', file);
+    
+        axios
+          .post(`http://localhost:8082/api/consultation/${consultation._id}/documents`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          })
+          .then((response) => {
+            console.log('File uploaded successfully:', response.data);
+          })
+          .catch((error) => {
+            console.error('Error uploading file:', error);
+          });
+      }
+    };
+    
+
+    
+    
+    return (
+      <div class="mt-4 mx-4">
+              <div class=" ml-60 overflow-hidden rounded-lg shadow-xs">
+                <div class="w-full overflow-x-auto">
+                <div className="flex items-center justify-between py-3 px-2 bg-gray-50">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">Consultations</h2>
+              <div className="flex space-x-2">
+                    
+              <div className="relative">
+              <select
+            onChange={(e) => handlePatientSelect(e.target.value === "all" ? null : patients.find(p => p._id === e.target.value))}
+            value={selectedPatient ? selectedPatient._id : ""}
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center"
+          >
+                    <option value="all">All</option>
+                    {patients.map((patient) => (
+                      <option key={patient?._id} value={patient?._id} className='bg-white text-black'>
+                        {`${patient.lastName} ${patient.firstName}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              <div className="relative">
+              <select
+                    onChange={(e) => handleDoctorSelect(e.target.value === "all" ? null : doctors.find(d => d._id === e.target.value))}
+                    value={selectedDoctor ? selectedDoctor._id : ""}
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center"
+                  >
+                    <option value="all">All</option>
+                    {doctors.map((doctor) => (
+                      <option key={doctor._id} value={doctor._id}>
+                        {`${doctor.firstName} ${doctor.lastName}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              </div>
+                  <table class="w-full text-sm  rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead>
+                      <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                        <th class="px-4 py-3">id_consultation</th>
+                        <th class="px-4 py-3">date de creation</th>
+                        <th class="px-4 py-3">Patient</th>
+                        <th class="px-4 py-3">Etat</th>
+                        <th class="px-4 py-3">Documents</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                    {filteredConsultations !== null && filteredConsultations.length > 0 ? (
+                      filteredConsultations.map((consultation, index) => (
+                        <tr key={consultation._id} className="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
+                          <td className="px-2 py-3 text-sm">{consultation._id}</td>
+                          <td>{consultation.date_creation.slice(0, 10)} at {consultation.heure_creation}</td>
+                          <td>{consultation.patient.lastName} {consultation.patient.firstName}</td>
+                          <td>
+                            {consultation.etat === 'En cours' ? (
+                              <span className="px-2 py-1 font-semibold leading-tight text-yellow-700 bg-yellow-100 rounded-full">
+                                {consultation.etat}
+                              </span>
+                            ) : consultation.etat === 'Ferme' ? (
+                              <span className="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+                                {consultation.etat}
+                              </span>
+                            ) : (
+                              <span>{consultation.etat}</span>
+                            )}
+                          </td>
+                          <td>
+                            {consultation.documents.length > 0 && (
+                              <>
+                                <button
+                                  key={0}
+                                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                                  // Ajoutez votre gestionnaire de clic ici
+                                >
+                                  {consultation.documents[0].substring(14)}
+                                </button>
+                                {consultation.documents.length > 1 && (
+                                  <>
+                                    <button
+                                      className="text-blue-500 hover:underline focus:outline-none mr-2"
+                                      // Add your click handler for "See All" button here
+                                    >
+                                      See All
+                                    </button>
+                                    
+
+                                  </>
+                                )}
+                                <button
+                                            className="bg-green-500 text-white rounded p-2"
+                                            onClick={() => {
+                                              fileInputRef.current.click();
+                                            }}
+                                          >
+                                            +
+                                          </button>
+                                          <input
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            onChange={(e) => handleFileSelect(consultation, e.target.files[0])}
+                                            style={{ display: 'none' }}
+                                            ref={fileInputRef}
+                                          />
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="px-4 py-3 text-center">
+                            {selectedPatient && selectedDoctor
+                              ? "Aucune consultation trouvée"
+                              : selectedPatient
+                              ? "Aucune consultation pour ce patient"
+                              : selectedDoctor
+                              ? "Aucune consultation pour ce médecin"
+                              : "Sélectionnez un patient et/ou un médecin"}
+                          </td>
+                        </tr>
+                      )}
+                      </tbody>
+
+                      </table>
+                      </div>
                 
+                    </div>
+                  </div>
+                    )
+                  }
 
-                <table class="w-full">
-                  <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                      <th class="px-4 py-3">id_consultation</th>
-                      <th class="px-4 py-3">Patient</th>
-                      <th class="px-4 py-3">Etat</th>
-                      <th class="px-4 py-3">Documents</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                    <tr class="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                            <img class="object-cover w-full h-full rounded-full" src="https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-1.2.1&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=200&amp;fit=max&amp;ixid=eyJhcHBfaWQiOjE3Nzg0fQ" alt="" loading="lazy" />
-                            <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Hans Burger</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">10x Developer</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">$855.85</td>
-                      <td class="px-4 py-3 text-xs">
-                        <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"> Approved </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">15-01-2021</td>
-                    </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                            <img class="object-cover w-full h-full rounded-full" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-0.3.5&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=200&amp;facepad=3&amp;fit=facearea&amp;s=707b9c33066bf8808c934c8ab394dff6" alt="" loading="lazy" />
-                            <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Jolina Angelie</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Unemployed</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">$369.75</td>
-                      <td class="px-4 py-3 text-xs">
-                        <span class="px-2 py-1 font-semibold leading-tight text-yellow-700 bg-yellow-100 rounded-full"> Pending </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">23-03-2021</td>
-                    </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                            <img class="object-cover w-full h-full rounded-full" src="https://images.unsplash.com/photo-1502720705749-871143f0e671?ixlib=rb-0.3.5&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=200&amp;fit=max&amp;s=b8377ca9f985d80264279f277f3a67f5" alt="" loading="lazy" />
-                            <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Dave Li</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Influencer</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">$775.45</td>
-                      <td class="px-4 py-3 text-xs">
-                        <span class="px-2 py-1 font-semibold leading-tight text-gray-700 bg-gray-100 rounded-full dark:text-gray-100 dark:bg-gray-700"> Expired </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">09-02-2021</td>
-                    </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                            <img class="object-cover w-full h-full rounded-full" src="https://images.unsplash.com/photo-1551006917-3b4c078c47c9?ixlib=rb-1.2.1&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=200&amp;fit=max&amp;ixid=eyJhcHBfaWQiOjE3Nzg0fQ" alt="" loading="lazy" />
-                            <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Rulia Joberts</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Actress</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">$1276.75</td>
-                      <td class="px-4 py-3 text-xs">
-                        <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"> Approved </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">17-04-2021</td>
-                    </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                            <img class="object-cover w-full h-full rounded-full" src="https://images.unsplash.com/photo-1566411520896-01e7ca4726af?ixlib=rb-1.2.1&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=200&amp;fit=max&amp;ixid=eyJhcHBfaWQiOjE3Nzg0fQ" alt="" loading="lazy" />
-                            <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Hitney Wouston</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Singer</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">$863.45</td>
-                      <td class="px-4 py-3 text-xs">
-                        <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-700"> Denied </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">11-01-2021</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="grid px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase border-t dark:border-gray-700 bg-gray-50 sm:grid-cols-9 dark:text-gray-400 dark:bg-gray-800">
-                <span class="flex items-center col-span-3"> Showing 21-30 of 100 </span>
-                <span class="col-span-2"></span>
-                <span class="flex col-span-4 mt-2 sm:mt-auto sm:justify-end">
-                  <nav aria-label="Table navigation">
-                    <ul class="inline-flex items-center">
-                      <li>
-                        <button class="px-3 py-1 rounded-md rounded-l-lg focus:outline-none focus:shadow-outline-purple" aria-label="Previous">
-                          <svg aria-hidden="true" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                            <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path>
-                          </svg>
-                        </button>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple">1</button>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple">2</button>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 text-white dark:text-gray-800 transition-colors duration-150 bg-blue-600 dark:bg-gray-100 border border-r-0 border-blue-600 dark:border-gray-100 rounded-md focus:outline-none focus:shadow-outline-purple">3</button>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple">4</button>
-                      </li>
-                      <li>
-                        <span class="px-3 py-1">...</span>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple">8</button>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple">9</button>
-                      </li>
-                      <li>
-                        <button class="px-3 py-1 rounded-md rounded-r-lg focus:outline-none focus:shadow-outline-purple" aria-label="Next">
-                          <svg class="w-4 h-4 fill-current" aria-hidden="true" viewBox="0 0 20 20">
-                            <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path>
-                          </svg>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </span>
-              </div>
-            </div>
-          </div>
-  )
-}
-
-export default Consultations
+  export default Consultations

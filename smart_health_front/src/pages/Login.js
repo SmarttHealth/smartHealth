@@ -2,6 +2,7 @@ import React,{useState} from 'react';
 import  axios  from 'axios';
 import {useNavigate} from 'react-router-dom'
 import hospitalBackground from '../images/bg_login.jpg';
+import {login} from './Api'
 export default function Login() {
     const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,19 +11,36 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8082/api/users/login', {
-        email,
-        password,
-      });
-      console.log('Response from server:', response.data.userData);
-      // Save the JWT token in localStorage
+        const response = await login({ email, password });
+      console.log('Response from server:', response.status);
+      localStorage.setItem('statusCode', response.status);
+      
+      //localStorage.setItem('statusCode', response.status);
       localStorage.setItem('user', JSON.stringify(response.data.userData));
-      navigate('/patient')
+      // Navigate based on user role
+      switch (response.data.userData.role) {
+        case 'Patient':
+          navigate('/assistant');
+          break;
+        case 'Medecin':
+          navigate('/medecin');
+          break;
+        case 'Assistant':
+          navigate('/assistant');
+          break;
+        // Add more cases if needed
+
+        default:
+          // Handle unknown role
+          break;
+      }
   
       // Handle the response, e.g., redirect the user or set authentication state
       console.log(response.data);
   
     } catch (error) {
+        localStorage.setItem('statusCode', error.response?.status || 500);
+
       // Handle errors, e.g., show an error message to the user
       console.error('Login failed', error);
     }

@@ -6,6 +6,7 @@ module.exports = mongoose.model('Assistant', {
     phone: { type: String},
     address: { type: String},
     specialite: {type: String},
+    image:{type:String},
     id_compte: {
         type: mongoose.Types.ObjectId, ref: "Compte"
     }

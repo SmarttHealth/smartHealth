@@ -1,35 +1,26 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import ServicesCard from "./ServicesCard";
 import { RiMicroscopeLine } from "react-icons/ri";
-import { MdLocalHospital } from "react-icons/md";
-import { FaHeartbeat } from "react-icons/fa";
-import EndocrinologieI from "../../images/servcie2Endocrinologie.jpg";
-import RhumotologueServiceI from "../../images/RhumotologueService.jpg";
-import heartHealthImage from "../../images/cardiologieService.jpeg";
+
+import axios from "axios";
 
 const Services = () => {
   const [selectedService, setSelectedService] = useState(null);
-
-  const servicesData = [
-    {
-      icon: <MdLocalHospital size={35} className="text-backgroundColor" />,
-      title: "Endocrinology",
-      image: EndocrinologieI,
-      description: "Endocrinology is a specialized branch of medicine that focuses on the study and management of the endocrine system, which plays a crucial role in regulating various bodily functions.",
-    },
-    {
-      icon: <RiMicroscopeLine size={35} className="text-backgroundColor" />,
-      title: "Rheumatology",
-      image: RhumotologueServiceI,
-      description: "Rheumatology is a specialized field within medicine that concentrates on the diagnosis and treatment of disorders affecting the musculoskeletal system, particularly the joints, bones, muscles, and connective tissues.",
-    },
-    {
-      icon: <FaHeartbeat size={35} className="text-backgroundColor" />,
-      title: "Cardiology ",
-      image: heartHealthImage,
-      description: "Cardiology is a specialized branch of medicine dedicated to the study, diagnosis, and treatment of diseases and conditions related to the cardiovascular system.",
-    },
-  ];
+   
+  const [services,setservices]=useState([]);
+  useEffect(()=>{
+    const getDoctors=async ()=>{
+      try{
+        const listeServices=await axios.get("http://localhost:8082/api/service/")
+        setservices(listeServices.data);
+        console.log("services",listeServices.data)
+      }
+      catch(err){
+        console.log(err)
+      }
+    };
+    getDoctors();
+  },[]);
 
   const openModal = (service) => {
     setSelectedService(service);
@@ -45,13 +36,13 @@ const Services = () => {
         <h1 className="text-4xl font-semibold text-cyan-800">Our Services</h1>
       </div>
       <div className="flex flex-col lg:flex-row gap-5 pt-14 ">
-        {servicesData.map((service, index) => (
+        {services.map((service, index) => (
           <ServicesCard
             key={index}
-            icon={service.icon}
-            title={service.title}
+            _id={service._id}
+            nameService={service.nameService}
             image={service.image}
-            description={service.description}
+            descService={service.descService}
             openModal={() => openModal(service)}
           />
         ))}
