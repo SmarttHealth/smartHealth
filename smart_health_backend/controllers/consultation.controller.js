@@ -1,6 +1,9 @@
 const db = require("../models/db")
 const Consultation = require("../models/consultation.model")
+const Patient = require("../models/patient.model")
+const Medecin = require("../models/medecin.model")
 const ObejectId = require("mongoose").Types.ObjectId
+
 
 
 exports.findAll = (req, res) =>{
@@ -8,6 +11,29 @@ exports.findAll = (req, res) =>{
     .then(data => res.send(data))
     .catch(err => console.log(err))
 }
+exports.findAllConsultationDetails = async (req, res) => {
+    try {
+      const consultations = await Consultation.find();
+      const consultationsWithDetails = [];
+  
+      for (const consultation of consultations) {
+        const patient = await Patient.findById(consultation.id_patient);
+        const medecin = await Medecin.findById(consultation.id_medecin);
+  
+        consultationsWithDetails.push({
+          ...consultation._doc,
+          patient: patient ? { id: patient._id, firstName: patient.firstName, lastName: patient.lastName } : null,
+          medecin: medecin ? { id: medecin._id, firstName: medecin.firstName, lastName: medecin.lastName } : null,
+        });
+      }
+  
+      res.status(200).json(consultationsWithDetails);
+    } catch (err) {
+      console.error('Error fetching consultations:', err);
+      res.status(500).json({ error: 'Erreur lors de la récupération des consultations' });
+    }
+  };
+  
 
 exports.findConsultation = (req, res) => {
     if(ObejectId.isValid(req.params.id) == false)
@@ -62,24 +88,63 @@ exports.deleteConsultation = (req, res) =>{
 }
 
 
+// exports.addDocumentsToConsultation = async (req, res) => {
+//     const { id } = req.params;
+//     const fileNames = req.files.map(file => file.filename);
+
+//   try {
+//     // // Vérifier si la consultation existe
+//     // const consultation = await Consultation.findById(id);
+//     console.log("fffffffffffffffffff:****************: ",fileNames)
+//     if (!consultation) {
+//       return res.status(404).json({ error: 'Consultation non trouvée' });
+//     }
+//     // Mettez à jour la consultation avec les nouveaux noms de fichiers
+//     const consultation = await Consultation.findByIdAndUpdate(
+//       id,
+//       { $push: { documents: { $each: fileNames } } },
+//       { new: true }
+//     );
+
+//     // // Ajouter les documents à la consultation existante
+//     // consultation.documents.push(...documents);
+//     await consultation.save();
+
+//     return res.status(200).json(consultation);
+//   } catch (err) {
+//     return res.status(500).json({ error: 'Erreur lors de l\'ajout des documents à la consultation' });
+//   }
+// };
+// Additional route for handling file uploads
 exports.addDocumentsToConsultation = async (req, res) => {
-    const { id } = req.params;
-  const { documents } = req.body;
-
   try {
-    // Vérifier si la consultation existe
-    const consultation = await Consultation.findById(id);
-    if (!consultation) {
-      return res.status(404).json({ error: 'Consultation non trouvée' });
-    }
+    const consultationId = req.params.id;
+    const fileNames = req.files.map(file => file.filename);
 
-    // Ajouter les documents à la consultation existante
-    consultation.documents.push(...documents);
-    await consultation.save();
+    // Mettez à jour la consultation avec les nouveaux noms de fichiers
+    const consultation = await Consultation.findByIdAndUpdate(
+      consultationId,
+      { $push: { documents: { $each: fileNames } } },
+      { new: true }
+    );
 
-    return res.status(200).json(consultation);
-  } catch (err) {
-    return res.status(500).json({ error: 'Erreur lors de l\'ajout des documents à la consultation' });
+    res.status(200).json({ success: true, message: "Documents ajoutés avec succès", consultation });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout des documents :", error);
+    res.status(500).json({ success: false, message: "Erreur lors de l'ajout des documents" });
   }
 };
+exports.uploadDocument = (req, res, next) => {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded' });
+    }
+  
+    // Handle the uploaded files as needed
+    const fileNames = req.files.map((file) => file.originalname);
+    console.log('Files uploaded successfully:', fileNames);
+  
+    // You can perform additional actions with the files if needed
+  
+    return res.status(200).json({ success: true, fileNames });
+  };
 
