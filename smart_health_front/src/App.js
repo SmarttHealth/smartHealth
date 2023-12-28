@@ -1,13 +1,9 @@
 import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
 import './App.css';
-import Inscription from './components/Inscription';
-import Home from './components/Home';
 import Navbar from './components/Navbar'
-import Login from './components/Login';
 import Assistant from './components/Assistant/Assistant';
-import Patient from './components/patient/Patient';
 import AuthGuard from './components/AuthGuard';
-import Inscription from './pages/Inscription';
+import Inscription from './pages/Inscription'
 import Login from './pages/Login';
 import Home from './pages/Home';
 
@@ -19,7 +15,7 @@ function App() {
     <Router>
       <div className="App">
          
-      
+      <Navbar/>
    
         <Routes>
           
@@ -40,7 +36,15 @@ function App() {
             </AuthGuard>
           }/>
           <Route path='/services' element={<ServiceDetails/>}/>
+          {/* <Route path='/newRdv' element={
+          <AuthGuard>
+            <RendezVous/>
+          </AuthGuard>
+        }> */}
+          
+        {/* </Route> */}
         </Routes>
+        
       </div>
     </Router>
     

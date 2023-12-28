@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import {useNavigate} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { getDoctors, getPatients, getPatientsInactives, getRDVsDetails } from '../Api';
+import { faPencilAlt, faTrash,faCheckCircle, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { getDoctors, getPatients, getPatientsInactives, getRDVsDetails, addConsultation, getRDV, deleteRDV } from '../Api';
 
 
 const RDVs = () => {
@@ -12,7 +13,7 @@ const RDVs = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patients, setPatients] = useState([]);
   const [acceptedRDVs, setAcceptedRDVs] = useState([]);
-
+  const navigate = useNavigate()
   // Function to generate unique IDs like "R001," "R002," etc.
   const generateID = (index, totalRDVs) => {
     return `R${(index + 1).toString().padStart(totalRDVs.toString().length, '0')}`;
@@ -70,15 +71,81 @@ const RDVs = () => {
   const handleDoctorSelect = (doctor) => {
     setSelectedDoctor(doctor);
   };
+  const handleNewRdv=()=>{
+    navigate("/newRdv")
+  }
+
+  const handleAccept = async (rdvId) => {
+    try {
+      // Fetch the RDV details
+      const rdvResponse = await getRDV(rdvId);
+  
+      if (rdvResponse.status !== 200) {
+        console.error('Failed to fetch RDV details');
+        return;
+      }
+  
+      const rdvDetails = rdvResponse.data;
+  
+      // Check if patient and medecin properties exist in rdvDetails
+      if (!rdvDetails.id_patient || !rdvDetails.id_medecin) {
+        console.error('Patient or Medecin details are missing in RDV');
+        return;
+      }
+  
+      // Create a new consultation object respecting the model structure
+      const newConsultation = {
+        id_patient: rdvDetails.id_patient,
+        id_medecin: rdvDetails.id_medecin,
+        date_creation: new Date(),
+        heure_creation: `${rdvDetails.Heure_debut_RDV} - ${rdvDetails.Heure_fin_RDV}`,
+        etat: 'en cours',
+        documents: [], // You may need to handle documents based on your logic
+      };
+  
+      // Add the new consultation
+      const addConsultationResponse = await addConsultation(newConsultation);
+  
+      if (addConsultationResponse.status === 201) {
+        // If the consultation is added successfully, delete the RDV
+        const deleteRDVResponse = await deleteRDV(rdvId);
+  
+        if (deleteRDVResponse.status === 200) {
+          // If the RDV is deleted successfully, update the RDVs state
+          const updatedRDVsResponse = await getRDVsDetails();
+          
+          if (updatedRDVsResponse.status === 200) {
+            // Update the RDVs state
+            setRdvs(updatedRDVsResponse.data);
+          } else {
+            console.error('Failed to fetch updated RDVs');
+          }
+        } else {
+          console.error('Failed to delete RDV');
+        }
+      } else {
+        console.error('Failed to add consultation');
+      }
+    } catch (error) {
+      console.error('Error accepting RDV:', error);
+    }
+  };
+  
+  
   return (
     <div class="relative flex flex-col min-w-0 mb-4 ml-5 lg:mb-0 break-words bg-gray-50 dark:bg-gray-800 w-99% shadow-lg rounded mr-5 mt-14">
               <div class="rounded-t mb-0 px-0 border-0">
                 <div class="flex flex-wrap items-center px-4 py-2">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex  justify-between py-3 px-2 bg-gray-50">
+              <div className="flex items-center">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">UPCOMING APPOINTMENTS</h2>
-              <div className="flex space-x-2">
-              
-  </div>
+              <div className="ml-50">
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 ease-in-out"
+                onClick={handleNewRdv()}>
+                <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </div>
+            </div>
   </div>
                 <table class="w-full">
                   <thead>
@@ -91,6 +158,7 @@ const RDVs = () => {
                       <th class="px-4 py-3">Time</th>
                       <th class="px-4 py-3">Contact</th>
                       <th class="px-4 py-3">Action</th>
+                      <th className="px-4 py-3">Accept</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
@@ -120,6 +188,14 @@ const RDVs = () => {
                       className="text-red-500 hover:text-red-700 ml-2"
                     >
                       <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </td>
+                  <td className="px-5 py-4 text-sm">
+                    <button
+                      className="text-green-500 hover:text-green-700"
+                      onClick={() => handleAccept(rdv._id)}
+                    >
+                      <FontAwesomeIcon icon={faCheckCircle} />
                     </button>
                   </td>
                 </tr>

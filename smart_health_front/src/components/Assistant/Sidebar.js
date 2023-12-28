@@ -3,7 +3,7 @@ import SidebarHeader from "./SidebarHeader";
 import SidebarNavItems from "./SidebarNavItems";
 function Sidebar({ activeidx, setidx }) {
   return (
-        <div class="fixed flex flex-col top-20 left-0 w-10 hover:w-64 md:w-64 bg-blue-900 dark:bg-gray-900 h-full text-white transition-all duration-300 border-none z-10 sidebar">
+        <div class="fixed flex flex-col top-20 left-0 w-14 hover:w-64 md:w-64 bg-blue-900 dark:bg-gray-900 h-full text-white transition-all duration-300 border-none z-10 sidebar">
           <div class="overflow-y-auto overflow-x-hidden flex flex-col justify-between flex-grow">
             <ul class="flex flex-col py-4 space-y-1">
               <li class="px-5 hidden md:block">

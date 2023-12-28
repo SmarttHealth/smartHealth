@@ -40,7 +40,7 @@ const Navbar = () => {
 
           <nav className=" hidden lg:flex flex-row items-center text-lg font-medium gap-8">
             <Link
-              to="home"
+              to="/home"
               spy={true}
               smooth={true}
               duration={500}
@@ -49,7 +49,7 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              to="about"
+              to="/about"
               spy={true}
               smooth={true}
               duration={500}
@@ -152,15 +152,6 @@ const Navbar = () => {
           >
             Blog
           </Link>
-
-          {/* <div className=" lg:hidden">
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-hoverColor transition duration-300 ease-in-out"
-              onClick={openForm}
-            >
-              Contact Us
-            </button>
-          </div> */}
         </div>
       </div>
     </div>

@@ -57,6 +57,8 @@ const Navbar = () => {
 
     setUserData(null);
     navigate('/login');
+    // Fermez le formulaire
+    closeForm();
   };
 
   const handleProfile = () => {
@@ -66,7 +68,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className=" fixed w-full z-10 text-blue">
+    <div className="fixed w-full z-10 text-blue">
       <div>
         <div className=" flex flex-row justify-between p-2 md:px-32 px-5 bg-white shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]">
           <div className=" flex flex-row items-center cursor-pointer">
@@ -157,7 +159,7 @@ const Navbar = () => {
             )}
           </div>
         </div>
-        <div className={`absolute top-14 right-80 ${dropdown ? 'block' : 'hidden'}`}>
+        <div className={`absolute top-14 right-25 px-25 ${dropdown ? 'block' : 'hidden'}`}>
           <div className="bg-white border rounded-md shadow-md p-2 text-blue-700">
             <div className="cursor-pointer" onClick={handleLogout}>
               <AiOutlineLogout size={20} className="mr-2" />
