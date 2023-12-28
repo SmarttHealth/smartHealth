@@ -4,7 +4,7 @@ import {useNavigate} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrash,faCheckCircle, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { getDoctors, getPatients, getPatientsInactives, getRDVsDetails, addConsultation, getRDV, deleteRDV } from '../Api';
-
+import RendezVous from '../patient/RendezVous';
 
 const RDVs = () => {
   const [rdvs,setRdvs]=useState([]);
@@ -13,7 +13,18 @@ const RDVs = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patients, setPatients] = useState([]);
   const [acceptedRDVs, setAcceptedRDVs] = useState([]);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState(null);
+
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
   // Function to generate unique IDs like "R001," "R002," etc.
   const generateID = (index, totalRDVs) => {
     return `R${(index + 1).toString().padStart(totalRDVs.toString().length, '0')}`;
@@ -141,10 +152,11 @@ const RDVs = () => {
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">UPCOMING APPOINTMENTS</h2>
               <div className="ml-50">
                 <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 ease-in-out"
-                onClick={handleNewRdv()}>
+                onClick={() => handleOpenModal()}>
                 <FontAwesomeIcon icon={faPlus} />
                 </button>
               </div>
+              {modalOpen && <RendezVous onClose={handleCloseModal} assistant={true}/>}
             </div>
   </div>
                 <table class="w-full">
@@ -173,7 +185,7 @@ const RDVs = () => {
                     </span>
                   </td> */}
                   <td className="px-4 py-3 text-sm">{rdv.type}</td>
-                  <td className="px-4 py-3 text-sm">{rdv.date_RDV.slice(0, 10)}</td>
+                  <td className="px-4 py-3 text-sm">{rdv.date_RDV}</td>
                   <td className="px-4 py-3 text-sm">{rdv.Heure_debut_RDV} - {rdv.Heure_fin_RDV}</td>
                   <td className="px-4 py-3 text-sm">{rdv.patient.contact}</td>
                   <td className="px-4 py-3 text-sm">

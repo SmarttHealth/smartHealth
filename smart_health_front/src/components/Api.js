@@ -175,10 +175,18 @@ apiJWT.interceptors.request.use(request=>{
 
     export const addDocumentsToConsultation = (consultationId, files) => {
         const formData = new FormData();
-        formData.append("files", files);
+        formData.append('files', files);
     
-        return apiJWT.post(`/consultation/${consultationId}/documents`, formData);
+        return apiJWT.post(`/consultation/${consultationId}/documents`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     };
+    export const readFileContent = (consultationId, fileName) => {
+        return apiJWT.get(`/consultation/${consultationId}/documents/${fileName}`);
+      };
+      
 
     //RDVs api
 
