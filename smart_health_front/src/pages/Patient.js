@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import imgDoc6 from "../images/doc6.jpg";
 import DashboardContent from "../components/patient/DashboardContent";
 import ConsultationsContent from "../components/patient/ConsultationsContent";
@@ -8,13 +8,35 @@ import ServiceSuiviContent from "../components/patient/ServiceSuiviContent";
 import ProfileContent from '../components/patient/ProfileContent';
 import StatsPatient from "../components/patient/StatsPatient";
 import Navbar from '../components/home/Navbar';
+import axios from "axios";
+import Services from '../components/service/Services';
+import { getPatient } from '../components/Api';
+
 const Patient = () => {
+  //const idPatient="6586be7b66cab453dc9ea319";
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [firstName, setPatientFirstName] = useState('');
+  const [lastName, setPatientlastName] = useState('');
+  const user=localStorage.getItem('user');
+  const userId=localStorage.getItem("userId");
+  console.log("le patient est ttttt ",user)
+  useEffect(() => {
+    console.log("le nom de patient est :",user._id);
+    const fetchPatientInfo = async () => {
+      try {
+        const response = await getPatient(userId);
+        setPatientFirstName(response.data.firstName);
+        setPatientlastName(response.data.lastName);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des informations du patient depuis l\'API:', error);
+      }
+    };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+    fetchPatientInfo();
+  }, []); // Assurez-vous de passer un tableau vide comme deuxième argument pour que cela se déclenche une seule fois
+
+
 
   return (
     
@@ -26,13 +48,13 @@ const Patient = () => {
       <div className="lg:flex-none w-full lg:w-1/5 h-screen px-7 py-8 bg-white border-r border-r-gray-100">
         <div className="rounded-full overflow-hidden  mb-6">
           <img
-            src="https://source.unsplash.com/MP0IUfwrn0A"
+            src="https://media.istockphoto.com/id/1090878494/fr/photo/bouchent-portrait-du-jeune-souriant-bel-homme-en-polo-bleu-isol%C3%A9-sur-fond-gris.jpg?s=612x612&w=0&k=20&c=d4gHKQJEydpFppzIO3poAdV5dcyYN3MiTGvP07bBSrY="
             alt="Patient Image"
             className="w-25 h-25 object-cover rounded-full mx-auto"
           />
         </div>
         <div className="font-bold text-lg text-center">
-          <span>kaoutar</span>
+          <span>{firstName}</span> <span>{lastName}</span>
         </div>
 
         <div className="mt-12 ">
@@ -62,7 +84,7 @@ const Patient = () => {
                     d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
               </span>
-              <span>Service Suivi</span>
+              <span>Services</span>
             </li>
             {/* <li className={`flex space-x-3 items-center px-6 py-3 rounded-lg ${activeSection === 'historique' ? 'bg-gray-200' : ''}`} onClick={() => setActiveSection('historique')}>
               <span>
@@ -95,7 +117,7 @@ const Patient = () => {
         {activeSection === 'dashboard' && <div><StatsPatient/><DashboardContent /></div>}
         {activeSection === 'rendezvous' && <div><StatsPatient/><RendezVousContent /></div>}
         {activeSection === 'profile' && <div><StatsPatient/><ProfileContent /></div>}
-        {activeSection === 'serviceSuivi' && <div><StatsPatient/><ServiceSuiviContent /></div>}
+        {activeSection === 'serviceSuivi' && <div><StatsPatient/><ServiceSuiviContent /><Services/></div>}
         {activeSection === 'historique' && <div><StatsPatient/><HistoriqueContent /></div>}
         {activeSection === 'consultations' && <div><StatsPatient/><ConsultationsContent /></div>}
         {/* ... (ajoutez d'autres sections ici) */}

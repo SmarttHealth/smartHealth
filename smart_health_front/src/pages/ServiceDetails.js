@@ -2,6 +2,7 @@ import React from 'react';
 import heartHealthImage from '../images/cardiologieService.jpeg';
 import Navbar from '../components/home/Navbar';
 import { useParams } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
 import { useEffect,useState
  } from 'react';
 
@@ -116,7 +117,7 @@ const ServiceDetails = () => {
     
             </div>
           ))} 
-          
+           <ToastContainer />
            {modalOpen && <RendezVous onClose={handleCloseModal}  doctorId={selectedDoctorId}/>}
         </div>
       </div>
