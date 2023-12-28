@@ -80,7 +80,7 @@ const Navbar = () => {
           {showNavItems && (
           <nav className=" hidden lg:flex flex-row items-center text-lg font-medium gap-8">
             <Link
-              to="home"
+              to="/home"
               spy={true}
               smooth={true}
               duration={500}
@@ -89,7 +89,7 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              to="about"
+              to="/about"
               spy={true}
               smooth={true}
               duration={500}
@@ -224,16 +224,7 @@ const Navbar = () => {
           >
             Blog
           </Link>
-          <Link
-            to="blog"
-            spy={true}
-            smooth={true}
-            duration={500}
-            className=" hover:text-hoverColor transition-all cursor-pointer"
-            onClick={closeMenu}
-          >
-            Contact Us 
-          </Link>
+
         </div>
       </div>
     </div>

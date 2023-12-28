@@ -119,7 +119,7 @@
     
     return (
       <div class="mt-4 mx-4">
-              <div class=" ml-60 overflow-hidden rounded-lg shadow-xs">
+              <div class=" ml-60 overflow-hidden rounded-lg shadow-xs shadow-lg">
                 <div class="w-full overflow-x-auto">
                 <div className="flex items-center justify-between py-3 px-2 bg-gray-50">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">Consultations</h2>
