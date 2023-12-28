@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
 import "../../styles/rendervous.css";
 import axios from 'axios';
+import {  toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { editRDV } from '../Api';
+import { addRDV } from '../Api';
 import { getPatients, getDoctors } from '../Api';
 
-const RendezVous = ({ onClose, doctorId, assistant }) => {
-  const [selectedAppointmentType, setSelectedAppointmentType] = useState("");
+const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
+  //const patientId = localStorage.getItem('patientId');
+  const patientId=localStorage.getItem("userId");
+  const [selectedAppointmentType, setSelectedAppointmentType] = useState(""); // Utilisez une chaîne au lieu d'un tableau
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedStartTime, setSelectedStartTime] = useState('');
   const [selectedEndTime, setSelectedEndTime] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('');
   const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -24,7 +31,17 @@ const RendezVous = ({ onClose, doctorId, assistant }) => {
 
     fetchDoctors();
   }, []);
-  const [patients, setPatients] = useState([]);
+  
+  useEffect(() => {
+    // Si appointmentToEdit existe, cela signifie que l'utilisateur veut modifier un rendez-vous
+    if (appointmentToEdit) {
+      setSelectedAppointmentType(appointmentToEdit.type);
+      setSelectedDate(appointmentToEdit.date_RDV);
+      setSelectedStartTime(appointmentToEdit.Heure_debut_RDV);
+      setSelectedEndTime(appointmentToEdit.Heure_fin_RDV);
+    }
+  }, [appointmentToEdit]);
+
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -46,6 +63,7 @@ const RendezVous = ({ onClose, doctorId, assistant }) => {
 
   const handleAppointmentTypeChange = (type) => {
     setSelectedAppointmentType(type);
+
   };
 
   const handleDoctorChange = (doctor) => {
@@ -54,6 +72,7 @@ const RendezVous = ({ onClose, doctorId, assistant }) => {
 
   const handlePatientChange = (patient) => {
     setSelectedPatient(patient);
+
   };
 
   const handleBookNow = async () => {
@@ -62,17 +81,25 @@ const RendezVous = ({ onClose, doctorId, assistant }) => {
       date_RDV: selectedDate,
       Heure_debut_RDV: selectedStartTime,
       Heure_fin_RDV: selectedEndTime,
-      id_patient: selectedPatient,
-      id_medecin: selectedDoctor,
-      // Ajoutez d'autres champs nécessaires
+      id_patient: patientId,
+      id_medecin: doctorId,
     };
 
     try {
-      const response = await axios.post('http://localhost:8082/api/RDV/', rendezVousData);
-      console.log('Rendez-vous ajouté avec succès:', response.data);
+      if (appointmentToEdit) {
+        // Si appointmentToEdit existe, cela signifie que l'utilisateur modifie un rendez-vous
+        await editRDV(appointmentToEdit._id, rendezVousData);
+        toast.info('Rendez-vous mis à jour avec succès');
+      } else {
+        // Sinon, l'utilisateur crée un nouveau rendez-vous
+        const response = await addRDV(rendezVousData);
+        toast.info(response.data.message || 'Rendez-vous ajouté avec succès');
+      }
+
       onClose();
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du rendez-vous:', error);
+      console.error('Erreur lors de la gestion du rendez-vous:', error);
+      toast.info('Erreur lors de la gestion du rendez-vous');
     }
   };
 
@@ -87,30 +114,29 @@ const RendezVous = ({ onClose, doctorId, assistant }) => {
           <p className="mt-6 text-sm text-white">Get an appointment with our experienced accountants</p>
           <img className="absolute top-0 left-0 -z-10 h-full w-full object-cover" src="https://images.unsplash.com/photo-1504672281656-e4981d70414b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="" />
         </div>
-
-        <div className="mx-auto grid max-w-screen-md px-4 pb-6 relative z-20">
-          <div className="mt-4 font-serif text-sm font-bold text-blue-900">Select appointment type</div>
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <label className="flex items-center text-black">
-              <input
-                type="radio"
-                value="controle"
-                checked={selectedAppointmentType === 'controle'}
-                onChange={() => handleAppointmentTypeChange('controle')}
-                className="mr-2 form-radio text-blue-500"
-              />
-              Controle
-            </label>
-            <label className="flex items-center text-black">
-              <input
-                type="radio"
-                value="consultation"
-                checked={selectedAppointmentType === 'consultation'}
-                onChange={() => handleAppointmentTypeChange('consultation')}
-                className="mr-2 form-radio text-blue-500"
-              />
-              Consultation
-            </label>
+        <div className="mx-auto grid max-w-screen-lg px-6 pb-20 relative z-20">
+        <div className="mt-4 font-serif text-sm font-bold text-blue-900">Select appointment type</div>
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <label className="flex items-center text-black">
+            <input
+              type="radio"
+              value="en ligne"
+              checked={selectedAppointmentType === 'en ligne'}
+              onChange={() => handleAppointmentTypeChange('en ligne')}
+              className="mr-2 form-radio text-blue-500"
+            />
+            en ligne
+          </label>
+          <label className="flex items-center text-black">
+            <input
+              type="radio"
+              value="en présentiel"
+              checked={selectedAppointmentType === 'en présentiel'}
+              onChange={() => handleAppointmentTypeChange('en présentiel')}
+              className="mr-2 form-radio text-blue-500"
+            />
+            en présentiel
+          </label>
           </div>
 
           {assistant && (
@@ -208,6 +234,7 @@ const RendezVous = ({ onClose, doctorId, assistant }) => {
             </div>
           </div>
         </div>
+       
       </div>
     
   );
