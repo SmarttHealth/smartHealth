@@ -1,13 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import "../../styles/rendervous.css";
 import axios from 'axios';
-const RendezVous = ({ onClose,doctorId }) => {
+import {  toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { editRDV } from '../Api';
+import { addRDV } from '../Api';
+const RendezVous = ({ onClose,doctorId,appointmentToEdit }) => {
   //const patientId = localStorage.getItem('patientId');
-  const patientId="65802783e1d52bff4ff93568";
+  const patientId=localStorage.getItem("userId");
   const [selectedAppointmentType, setSelectedAppointmentType] = useState(""); // Utilisez une chaîne au lieu d'un tableau
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedStartTime, setSelectedStartTime] = useState('');
   const [selectedEndTime, setSelectedEndTime] = useState('');
+  
+
+  useEffect(() => {
+    // Si appointmentToEdit existe, cela signifie que l'utilisateur veut modifier un rendez-vous
+    if (appointmentToEdit) {
+      setSelectedAppointmentType(appointmentToEdit.type);
+      setSelectedDate(appointmentToEdit.date_RDV);
+      setSelectedStartTime(appointmentToEdit.Heure_debut_RDV);
+      setSelectedEndTime(appointmentToEdit.Heure_fin_RDV);
+    }
+  }, [appointmentToEdit]);
 
   const timeOptions = [
     '09:00', '10:00', '11:00', '12:00',
@@ -16,7 +31,7 @@ const RendezVous = ({ onClose,doctorId }) => {
   ];
 
   const handleAppointmentTypeChange = (type) => {
-    setSelectedAppointmentType(type); // Utilisez une chaîne pour stocker le type sélectionné
+    setSelectedAppointmentType(type);
   };
 
   const handleBookNow = async () => {
@@ -27,18 +42,26 @@ const RendezVous = ({ onClose,doctorId }) => {
       Heure_fin_RDV: selectedEndTime,
       id_patient: patientId,
       id_medecin: doctorId,
-
-      // Ajoutez d'autres champs nécessaires
     };
-  
+
     try {
-      const response = await axios.post('http://localhost:8082/api/RDV/', rendezVousData);
-      console.log('Rendez-vous ajouté avec succès:', response.data);
+      if (appointmentToEdit) {
+        // Si appointmentToEdit existe, cela signifie que l'utilisateur modifie un rendez-vous
+        await editRDV(appointmentToEdit._id, rendezVousData);
+        toast.info('Rendez-vous mis à jour avec succès');
+      } else {
+        // Sinon, l'utilisateur crée un nouveau rendez-vous
+        const response = await addRDV(rendezVousData);
+        toast.info(response.data.message || 'Rendez-vous ajouté avec succès');
+      }
+
       onClose();
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du rendez-vous:', error);
+      console.error('Erreur lors de la gestion du rendez-vous:', error);
+      toast.info('Erreur lors de la gestion du rendez-vous');
     }
   };
+
   return (
     <div className="modal-overlay  pt-0">
       <div className="modal z-30">
@@ -57,22 +80,22 @@ const RendezVous = ({ onClose,doctorId }) => {
           <label className="flex items-center text-black">
             <input
               type="radio"
-              value="controle"
-              checked={selectedAppointmentType === 'controle'}
-              onChange={() => handleAppointmentTypeChange('controle')}
+              value="en ligne"
+              checked={selectedAppointmentType === 'en ligne'}
+              onChange={() => handleAppointmentTypeChange('en ligne')}
               className="mr-2 form-radio text-blue-500"
             />
-            Controle
+            en ligne
           </label>
           <label className="flex items-center text-black">
             <input
               type="radio"
-              value="consultation"
-              checked={selectedAppointmentType === 'consultation'}
-              onChange={() => handleAppointmentTypeChange('consultation')}
+              value="en présentiel"
+              checked={selectedAppointmentType === 'en présentiel'}
+              onChange={() => handleAppointmentTypeChange('en présentiel')}
               className="mr-2 form-radio text-blue-500"
             />
-            Consultation
+            en présentiel
           </label>
         </div>
           <div className="">
@@ -118,6 +141,7 @@ const RendezVous = ({ onClose,doctorId }) => {
             Apointment
           </button>
         </div>
+       
       </div>
     </div>
   );

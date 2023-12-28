@@ -61,30 +61,51 @@ exports.deleteService = (req, res) =>{
     }
 }
 exports.findDoctorsForService = async (req, res) => {
-    try {
-      const serviceId = req.params.id;
-  
-      if (!ObejectId.isValid(serviceId)) {
-        return res.status(400).json({
-          error: 'Given Object ID is not valid: ' + serviceId,
-        });
-      }
-  
-      const service = await Service.findById(serviceId);
-  
-      if (!service) {
-        return res.status(404).json({
-          error: 'No record with the given ID: ' + serviceId,
-        });
-      }
-  
-      const doctors = await Doctor.find({ _id: { $in: service.medecins } });
-  
-      res.json(doctors);
-    } catch (error) {
-      console.error('Error fetching doctors for service:', error);
-      res.status(500).json({
-        error: 'Internal Server Error',
+  try {
+    const serviceId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+      return res.status(400).json({
+        error: 'Given Object ID is not valid: ' + serviceId,
       });
     }
-  };
+
+    const service = await Service.findById(serviceId);
+
+    if (!service) {
+      return res.status(404).json({
+        error: 'No record with the given ID: ' + serviceId,
+      });
+    }
+
+    const doctors = await Doctor.find({ _id: { $in: service.medecins } });
+
+    res.json(doctors);
+  } catch (error) {
+    console.error('Error fetching doctors for service:', error);
+    res.status(500).json({
+      error: 'Internal Server Error',
+    });
+  }
+};
+exports.findServicesForDoctor = async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+
+    if (ObejectId.isValid(doctorId)) {
+      return res.status(400).json({
+        error: 'Given Object ID is not valid: ' + doctorId,
+      });
+    }
+
+    // Utilisez l'ID du médecin pour récupérer les services associés
+    const services = await Service.find({ medecins: ObejectId(doctorId) });
+
+    res.json(services);
+  } catch (error) {
+    console.error('Error fetching services for doctor:', error);
+    res.status(500).json({
+      error: 'Internal Server Error',
+    });
+  }
+};
