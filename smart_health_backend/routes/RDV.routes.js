@@ -17,5 +17,6 @@ router.use(verifyJWT)
     router.get("/:id",RDVController.findRDV);
     router.delete("/:id", RDVController.deleteRDV);
     router.put("/:id", RDVController.updateRDV);
-    
+    router.get("/exitingRdv",RDVController.checkAvailability);
+    router.get("/rdvPatient/:id",RDVController.getRdvByPatientId);
 module.exports = router;

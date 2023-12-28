@@ -11,7 +11,7 @@ exports.findAll = (req, res) =>{
     .catch(err => console.log(err))
 }
 
-exports.findUser = (req, res) => {
+exports.findPatient = (req, res) => {
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({
             error: 'given Object id is not valid : '+ req.params.id

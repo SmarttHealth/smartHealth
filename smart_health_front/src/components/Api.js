@@ -138,6 +138,9 @@ apiJWT.interceptors.request.use(request=>{
     export const editService = (serviceId, serviceDto) => {
         return apiJWT.put(`/service/${serviceId}`, serviceDto);
     }
+    export const getServiceForDoctor=(doctorId)=>{
+        return apiJWT.get(`/service/serviceDoctor/${doctorId}`);
+    }
         
     export const deleteService = (serviceId) => {
         return apiJWT.delete(`/service/${serviceId}`);
@@ -154,7 +157,7 @@ apiJWT.interceptors.request.use(request=>{
     export const addConsultation = ( consultationDto) => {
         return apiJWT.post('/consultation', consultationDto);
     };
-      
+    
     export const getConsultation = (consultationId) =>{
         return apiJWT.get(`/consultation/${consultationId}`);
     };
@@ -166,6 +169,9 @@ apiJWT.interceptors.request.use(request=>{
     export const deleteConsultation = (consultationId) => {
         return apiJWT.delete(`/consultation/${consultationId}`);
     } 
+    export const getConsultationParPatient=(patientId)=>{
+        return apiJWT.get(`/consultation//patient/${patientId}`)
+    }
 
     export const addDocumentsToConsultation = (consultationId, files) => {
         const formData = new FormData();
@@ -191,7 +197,8 @@ apiJWT.interceptors.request.use(request=>{
     export const getRDVsDetails = () =>{
         return apiJWT.get('/RDV/rdvs');
     };
-    export const addRDV = ( rdvDto) => {
+
+    export const addRDV = (rdvDto) => {
         return apiJWT.post('/RDV', rdvDto);
     };
       
@@ -206,7 +213,13 @@ apiJWT.interceptors.request.use(request=>{
     export const deleteRDV = (rdvId) => {
         return apiJWT.delete(`/RDV/${rdvId}`);
     } 
-       
+   
+    export const  getRDVParPatient=(patientId)=>{
+        return apiJWT.get(`/RDV/rdvPatient/${patientId}`);
+
+    } 
+    
+    
 
 
 

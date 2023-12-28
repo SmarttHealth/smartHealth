@@ -166,3 +166,29 @@ exports.uploadDocument = (req, res, next) => {
     }
   };
 
+  exports.findConsultationsByPatient = async (req, res) => {
+    try {
+      const patientId = req.params.id; // Ajoutez la récupération de l'ID du patient depuis les paramètres de la requête
+      const consultations = await Consultation.find({ id_patient: patientId });
+  
+      const consultationsWithDetails = [];
+  
+      for (const consultation of consultations) {
+        const patient = await Patient.findById(consultation.id_patient);
+        const medecin = await Medecin.findById(consultation.id_medecin);
+  
+        consultationsWithDetails.push({
+          ...consultation._doc,
+          patient: patient ? { id: patient._id, firstName: patient.firstName, lastName: patient.lastName } : null,
+          medecin: medecin ? { id: medecin._id, firstName: medecin.firstName, lastName: medecin.lastName } : null,
+        });
+      }
+  
+      res.status(200).json(consultationsWithDetails);
+      console.log("response pour getter les consultations par id Patient",res);
+    } catch (err) {
+      console.error('Error fetching consultations:', err);
+      res.status(500).json({ error: 'Erreur lors de la récupération des consultations' });
+    }
+  };
+  

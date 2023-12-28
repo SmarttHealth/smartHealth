@@ -13,7 +13,7 @@ router.use(verifyJWT)
     router.get("/", PatientController.findAll);
     router.post("/", PatientController.addUser);
     router.get('/inactiveAccounts', PatientController.patientWithInactiveState);
-    router.get("/:id",PatientController.findUser);
+    router.get("/:id",PatientController.findPatient);
     router.delete("/:id", PatientController.deleteUser);
     router.put("/:id", PatientController.updateUser);
 
