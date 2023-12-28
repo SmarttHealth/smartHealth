@@ -3,7 +3,8 @@ const Consultation = require("../models/consultation.model")
 const Patient = require("../models/patient.model")
 const Medecin = require("../models/medecin.model")
 const ObejectId = require("mongoose").Types.ObjectId
-
+const fs = require('fs').promises;
+const path = require('path');
 
 
 exports.findAll = (req, res) =>{
@@ -146,5 +147,22 @@ exports.uploadDocument = (req, res, next) => {
     // You can perform additional actions with the files if needed
   
     return res.status(200).json({ success: true, fileNames });
+  };
+
+  exports.getFileContent = async (req, res) => {
+    const { id, fileName } = req.params;
+    console.log("id de consultatin 888888888888: ",fileName)
+  
+    try {
+      // Assuming your files are stored in a specific directory
+      const filePath = path.join(__dirname, '../../../smartHealth/smart_health_front/public/documents', fileName);
+      console.log("path$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4 ",filePath)
+      // Read the content of the file
+      const fileContent = await fs.readFile(filePath, 'base64');
+      res.status(200).json({ content: fileContent });
+    } catch (error) {
+      console.error('Error reading file content:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   };
 
