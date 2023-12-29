@@ -82,7 +82,7 @@ const About = () => {
                     </div>
                 </div>
             </div>
-            <div class="w-full px-4 mb-10 lg:w-1/2 lg:mb-0">
+            <div class="w-full h-3/4 px-4 mb-10 lg:w-1/2 lg:mb-0">
                 <img src={img} alt=""
                     class="relative object-cover w-full h-full rounded"/>
             </div>

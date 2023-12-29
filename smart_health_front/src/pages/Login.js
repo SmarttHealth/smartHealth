@@ -1,5 +1,4 @@
 import React,{useState} from 'react';
-import  axios  from 'axios';
 import {useNavigate} from 'react-router-dom'
 import hospitalBackground from '../images/bg_login.jpg';
 
@@ -24,7 +23,7 @@ export default function Login() {
       // Navigate based on user role
       switch (response.data.userData.role) {
         case 'Patient':
-          navigate('/patient');
+          navigate('/assistant');
           break;
         case 'Medecin':
           navigate('/medecin');
