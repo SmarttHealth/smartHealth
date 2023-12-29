@@ -32,5 +32,6 @@ router.use(verifyJWT)
     router.post("/:id/documents",multer({ storage }).array("files", 5), ConController.addDocumentsToConsultation)
     // Add a new route to get the content of a file
     router.get("/:id/documents/:fileName", ConController.getFileContent);
+    router.get("/countConsultation/:id",ConController.getCountByPatientId);
 
 module.exports = router;

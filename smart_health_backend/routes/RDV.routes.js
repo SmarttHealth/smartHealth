@@ -19,4 +19,5 @@ router.use(verifyJWT)
     router.put("/:id", RDVController.updateRDV);
     router.get("/exitingRdv",RDVController.checkAvailability);
     router.get("/rdvPatient/:id",RDVController.getRdvByPatientId);
+    router.get("/countRDV/:id",RDVController.getRdvCountByPatientId);
 module.exports = router;
