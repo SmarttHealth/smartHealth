@@ -183,3 +183,24 @@ exports.checkAvailability = async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   };
+  exports.getRdvCountByPatientId = async (req, res) => {
+    try {
+      // Récupérez l'ID du patient depuis les paramètres de la requête
+      const patientId = req.params.id;
+  
+      
+      const patient = await Patient.findById(patientId);
+      if (!patient) {
+        return res.status(404).json({ message: 'Patient not found' });
+      }
+  
+      
+      const rdvCount = await RDV.countDocuments({ id_patient: patientId });
+  
+      
+      res.status(200).json({ rdvCount });
+    } catch (error) {
+      console.error('Error fetching rdv count by patient ID:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };

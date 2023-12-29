@@ -192,3 +192,15 @@ exports.uploadDocument = (req, res, next) => {
     }
   };
   
+  exports.getCountByPatientId = async (req, res) => {
+    try {
+      const patientId = req.params.id; 
+      const consultationCount = await Consultation.countDocuments({ id_patient: patientId });
+  
+      res.status(200).json({ count: consultationCount });
+    } catch (err) {
+      console.error('Error fetching consultation count:', err);
+      res.status(500).json({ error: 'Erreur lors de la récupération du nombre de consultations' });
+    }
+  };
+  

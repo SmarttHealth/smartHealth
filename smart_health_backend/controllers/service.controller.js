@@ -64,7 +64,7 @@ exports.findDoctorsForService = async (req, res) => {
   try {
     const serviceId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+    if (!ObejectId.isValid(serviceId)) {
       return res.status(400).json({
         error: 'Given Object ID is not valid: ' + serviceId,
       });
