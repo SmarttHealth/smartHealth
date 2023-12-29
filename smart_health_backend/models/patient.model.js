@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+
+
 module.exports = mongoose.model('Patient', {
     firstName: { type: String},
     lastName: { type: String},

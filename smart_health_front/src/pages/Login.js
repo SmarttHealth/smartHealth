@@ -2,7 +2,7 @@ import React,{useState} from 'react';
 import {useNavigate} from 'react-router-dom'
 import hospitalBackground from '../images/bg_login.jpg';
 
-import {login} from '../components/Api';
+import {login} from '../components/Api'
 
 export default function Login() {
     const [email, setEmail] = useState('');

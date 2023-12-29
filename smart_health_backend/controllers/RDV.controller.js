@@ -159,6 +159,101 @@ exports.checkAvailability = async (req, res) => {
       console.error('Erreur lors de la vérification de la disponibilité du médecin:', err);
       res.status(500).json({ error: 'Erreur lors de la vérification de la disponibilité du médecin' });
     }
+
+}
+
+/*
+exports.getPatientsWithAppointmentsToday = async (req, res) =>{
+    try {
+        const { id_medecin } = req.params;
+        // Récupérer la date d'aujourd'hui
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+  
+        // Requête pour obtenir les RDV d'aujourd'hui
+        const appointmentsToday = await RDV.find({
+          date_RDV: {
+            $gte: today, 
+            $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) 
+          },
+          id_medecin: id_medecin
+        }).populate('id_patient'); // Populate pour obtenir les détails des patients associés aux RDV
+  
+        // Nombre de patients ayant un RDV aujourd'hui
+        const numberOfPatientsToday = appointmentsToday.length;
+  
+        // Liste des patients ayant un RDV aujourd'hui
+        const patientsList = appointmentsToday.map(appointment => ({
+          patient: appointment.id_patient,
+          date_RDV: appointment.date_RDV,
+          heure_debut_RDV: appointment.Heure_debut_RDV,
+          heure_fin_RDV: appointment.Heure_fin_RDV,
+          etat: appointment.etat
+        }));
+  
+        // Envoyer la réponse avec le nombre et la liste des patients
+        return res.status(200).json({
+          numberOfPatientsToday,
+          patientsList
+        });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Erreur lors de la récupération des RDV' });
+      }
+}
+*/
+
+exports.getPatientsWithAppointmentsTodayByStatus = async (req, res) =>{
+    try {
+        const { id_medecin, etat } = req.params;
+        // Récupérer la date d'aujourd'hui
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let appointmentsToday = [];
+
+        if(etat === "any"){
+            // Requête pour obtenir les RDV d'aujourd'hui
+           appointmentsToday = await RDV.find({
+            date_RDV: {
+              $gte: today, 
+              $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) 
+            },
+            id_medecin: id_medecin
+          }).populate('id_patient'); 
+        }else{
+            // Requête pour obtenir les RDV d'aujourd'hui
+             appointmentsToday = await RDV.find({
+              date_RDV: {
+                $gte: today, 
+                $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) 
+              },
+              id_medecin: id_medecin,
+              etat: etat
+            }).populate('id_patient'); 
+        }
+
+        // Nombre de patients ayant un RDV aujourd'hui
+        const numberOfPatientsToday = appointmentsToday.length;
+        // Liste des patients ayant un RDV aujourd'hui
+        const patientsList = appointmentsToday.map(appointment => ({
+          patient: appointment.id_patient,
+          date_RDV: appointment.date_RDV,
+          heure_debut_RDV: appointment.Heure_debut_RDV,
+          heure_fin_RDV: appointment.Heure_fin_RDV,
+          etat: appointment.etat
+        }));
+  
+        // Envoyer la réponse avec le nombre et la liste des patients
+        return res.status(200).json({
+          numberOfPatientsToday,
+          patientsList
+        });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Erreur lors de la récupération des RDV' });
+      }
+}
+
   };
   exports.getRdvByPatientId = async (req, res) => {
     
@@ -204,3 +299,4 @@ exports.checkAvailability = async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   };
+

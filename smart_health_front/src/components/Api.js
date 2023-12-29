@@ -191,6 +191,22 @@ apiJWT.interceptors.request.use(request=>{
       };
       
 
+    export const getConsultationByPatAndMed = (id_patient, id_medecin) =>{
+        return apiJWT.get(`/consultation/medecin/${id_medecin}/patient/${id_patient}`,);
+    }
+
+    export const setGenerateOrdonnance = (patient, medecin, medicaments) => {
+        return apiJWT.post('/consultation/generateRapport',{patient, medecin, medicaments});
+    }
+
+    export const setGenerateAnalyse = (patient, medecin, analyses) => {
+        return apiJWT.post('/consultation/generateAnalyse',{patient, medecin, analyses});
+    }
+
+    export const setGenerateScanner = (patient, medecin, typeScanner, indications) => {
+        return apiJWT.post('/consultation/generateScanner',{patient, medecin, typeScanner, indications});
+    }
+
     //RDVs api
 
     export const getRDVs = () =>{
@@ -226,6 +242,12 @@ apiJWT.interceptors.request.use(request=>{
     export const deleteRDV = (rdvId) => {
         return apiJWT.delete(`/RDV/${rdvId}`);
     } 
+
+       
+    export const getPatientsWithAppointmentsTodayByStatus = (id_medecin, etat) =>{
+        return apiJWT.get(`/RDV/medecin/${id_medecin}/etat/${etat}`);
+    }
+
    
     export const  getRDVParPatient=(patientId)=>{
         return apiJWT.get(`/RDV/rdvPatient/${patientId}`);
@@ -237,6 +259,7 @@ apiJWT.interceptors.request.use(request=>{
     } 
     
     
+
 
 
 

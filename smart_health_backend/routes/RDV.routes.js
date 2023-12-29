@@ -17,6 +17,7 @@ router.use(verifyJWT)
     router.get("/:id",RDVController.findRDV);
     router.delete("/:id", RDVController.deleteRDV);
     router.put("/:id", RDVController.updateRDV);
+    router.get("/medecin/:id_medecin/etat/:etat", RDVController.getPatientsWithAppointmentsTodayByStatus);
     router.get("/exitingRdv",RDVController.checkAvailability);
     router.get("/rdvPatient/:id",RDVController.getRdvByPatientId);
     router.get("/countRDV/:id",RDVController.getRdvCountByPatientId);

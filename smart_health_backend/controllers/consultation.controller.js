@@ -3,8 +3,14 @@ const Consultation = require("../models/consultation.model")
 const Patient = require("../models/patient.model")
 const Medecin = require("../models/medecin.model")
 const ObejectId = require("mongoose").Types.ObjectId
-const fs = require('fs').promises;
+
+const fs = require("fs");
+const PDFDocument = require("pdfkit-table");
+
+
+const fss = require('fs').promises;
 const path = require('path');
+
 
 
 exports.findAll = (req, res) =>{
@@ -135,7 +141,7 @@ exports.addDocumentsToConsultation = async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur lors de l'ajout des documents" });
   }
 };
-exports.uploadDocument = (req, res, next) => {
+exports.uploadDocument = (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
     }
@@ -148,6 +154,239 @@ exports.uploadDocument = (req, res, next) => {
   
     return res.status(200).json({ success: true, fileNames });
   };
+
+
+
+exports.getConsultationByIdPatient = (req, res) => {
+  const {id_patient, id_medecin} = req.params;
+  Consultation.find({ id_patient: id_patient, id_medecin: id_medecin })
+    .then((consultations) => {
+      if (!consultations) {
+        return res.status(404).json({ message: 'Aucune consultation trouvée pour ce patient' });
+      }
+      // Retourner les consultations trouvées
+      return res.status(200).json(consultations);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: 'Erreur lors de la récupération des consultations', error: err });
+    });
+}
+
+exports.generateOrdonnace = (req, res) => {
+  const { medicaments, medecin, patient } = req.body;
+  console.log('med ::: ',medicaments);
+    console.log('medecin ::: ',medecin );
+    console.log('patient ::: ',patient);
+  const doc = new PDFDocument();
+  const filePath = `../docs/ordonance_${Date.now()}.pdf`;
+  const writeStream = fs.createWriteStream(filePath);
+  const currentDate = new Date().toLocaleDateString('fr-FR');
+  doc.pipe(writeStream);
+
+  doc
+    .image("./img/logo.png", 50, 45, { width: 80 })
+    .fillColor("#444444")
+    .fontSize(20)
+    .text("SMARTH_HEALTH", 110, 70)
+    .moveDown(2)
+    .fontSize(12)
+    .text(`Dr. ${medecin.firstName} ${medecin.lastName}`,200, 65, { align: "right" })
+    .text(`${medecin.phone}`,200, 80, { align: "right" })
+    .text(`${medecin.address}`,200, 95, { align: "right" })
+    .text(medecin.specialite, 200, 110, { align: "right" })
+    .moveDown()
+    .text(`Ordonnance Médicale`, { indent: 50 })
+    .text(`Date: ${currentDate}`, 200, 150, { align: "right" })
+    .moveDown();
+
+    doc.moveDown(2)
+    .fontSize(12)
+    .text(`Patient:`, 50)
+    .text(`Nom & Prénom :${patient.firstName} ${patient.lastName}`, { indent: 50 })
+    .text(`téléphone: ${patient.phone}`, { indent: 50 })
+    .text(`date de naissance: ${patient.birthday}`, { indent: 50 })
+    .text(`addresse: ${patient.address}`, { indent: 50 })
+    .moveDown(2);
+
+  const table = {
+    headers: ["Name of Medicament", "Nombre de prise par jour", "Période", "Commentaire"],
+    rows: [],
+    options: {
+      width: 500,
+      align: 'left',
+      fontSize: 12
+    }
+  };
+
+  // Add the medications to the table
+  for (const med of medicaments) {
+    table.rows.push([med.medicament, med.nbPrise, med.periode, med.comment]);
+  }
+
+  doc.table(table, 50, 180, { width: 500 });
+
+ 
+
+  doc.moveDown(6)
+    .fontSize(12)
+    .text(`Signature du médecin :`, { align: "right" })
+    .text(`Dr. ${medecin.firstName} ${medecin.lastName}`,200, 420, { align: "right" })
+    .moveDown(2);
+
+  
+ doc.end(); // Finalize the PDF document
+
+  writeStream.on('finish', () => {
+    res.status(200).json({ success: true, message: "Ordonnance généré avec succès", filePath });
+  });
+
+  writeStream.on('error', (err) => {
+    console.error("Erreur lors de la génération du rapport:", err);
+    res.status(500).json({ success: false, message: "Erreur lors de la génération du rapport" });
+  });
+};
+
+
+exports.generateAnalyse = (req, res) => {
+  const { analyses, medecin, patient } = req.body;
+  const doc = new PDFDocument();
+  const filePath = `../docs/analyse_${Date.now()}.pdf`;
+  const writeStream = fs.createWriteStream(filePath);
+  const currentDate = new Date().toLocaleDateString('fr-FR');
+  doc.pipe(writeStream);
+
+  // En-tête
+  doc
+    .image("./img/logo.png", 50, 45, { width: 80 })
+    .fillColor("#444444")
+    .fontSize(20)
+    .text("NOM DU CABINET", 110, 70)
+    .moveDown(2)
+    .fontSize(12)
+    .text(`Dr. ${medecin.firstName} ${medecin.lastName}`, { align: "right" })
+    .text(`${medecin.phone}`, { align: "right" })
+    .text(`${medecin.address}`, { align: "right" })
+    .moveDown()
+    .text(`Ordonnance d'Analyses Médicales`, { indent: 50 })
+    .text(`Date: ${currentDate}`, { align: "right" })
+    .moveDown();
+
+  // Informations sur le patient
+  doc.moveDown(2)
+    .fontSize(12)
+    .text(`Patient:`, 50)
+    .text(`Nom & Prénom : ${patient.firstName} ${patient.lastName}`, { indent: 50 })
+    .text(`Téléphone: ${patient.phone}`, { indent: 50 })
+    .text(`Date de naissance: ${patient.birthday}`, { indent: 50 })
+    .text(`Adresse: ${patient.address}`, { indent: 50 })
+    .moveDown(2);
+
+  // Prescription des analyses médicales
+  doc.moveDown()
+    .fontSize(12)
+    .text(`Je soussigné, Dr. ${medecin.firstName} ${medecin.lastName}, prescris les analyses suivantes pour le diagnostic et le suivi médical du patient :`)
+    .moveDown();
+
+  for (const analyse of analyses) {
+    doc.text(`- ${analyse.analyse}`, { indent: 70 });
+  }
+
+  // Instruction sur les résultats et la communication
+  doc.moveDown()
+    .text(`Ces analyses doivent être réalisées dans un laboratoire médical accrédité. Les résultats sont à communiquer au médecin prescripteur dans un délai raisonnable pour évaluation.`)
+    .moveDown();
+
+  // Signature du médecin
+  doc.moveDown(4)
+    .fontSize(12)
+    .text(`Signature du médecin :`, { align: "right" })
+    .text(`Dr. ${medecin.firstName} ${medecin.lastName}`, { align: "right" })
+    .moveDown(2);
+
+  doc.end(); // Finalize the PDF document
+
+  writeStream.on('finish', () => {
+    res.status(200).json({ success: true, message: "Analyse générée avec succès", filePath });
+  });
+
+  writeStream.on('error', (err) => {
+    console.error("Erreur lors de la génération du rapport:", err);
+    res.status(500).json({ success: false, message: "Erreur lors de la génération du rapport" });
+  });
+};
+
+exports.generateScanner = (req, res) => {
+  const { medecin, patient, typeScanner, indications } = req.body;
+  const doc = new PDFDocument();
+  const filePath = `../docs/scanner_${Date.now()}.pdf`;
+  const writeStream = fs.createWriteStream(filePath);
+  const currentDate = new Date().toLocaleDateString('fr-FR');
+  doc.pipe(writeStream);
+
+  // En-tête
+  doc
+    .image("./img/logo.png", 50, 45, { width: 80 })
+    .fillColor("#444444")
+    .fontSize(20)
+    .text("NOM DU CABINET", 110, 70)
+    .moveDown(2)
+    .fontSize(12)
+    .text(`Dr. ${medecin.firstName} ${medecin.lastName}`, { align: "right" })
+    .text(`${medecin.phone}`, { align: "right" })
+    .text(`${medecin.address}`, { align: "right" })
+    .moveDown();
+
+    doc.moveDown()
+    .fontSize(12)
+    .text(`Ordonnance pour Scanner Médical`, { align: "center" })
+    .text(`Date: ${currentDate}`, { align: "right" })
+    .moveDown();
+
+  // Informations sur le patient
+  doc.moveDown(2)
+    .fontSize(12)
+    .text(`Patient:`, 50)
+    .text(`Nom & Prénom : ${patient.firstName} ${patient.lastName}`, { indent: 50 })
+    .text(`Téléphone: ${patient.phone}`, { indent: 50 })
+    .text(`Date de naissance: ${patient.birthday}`, { indent: 50 })
+    .text(`Adresse: ${patient.address}`, { indent: 50 })
+    .moveDown(2);
+
+  // Prescription des analyses médicales
+  doc.moveDown()
+    .fontSize(12)
+    .text(`Je soussigné, Dr. ${medecin.firstName} ${medecin.lastName}, prescris le scanner suivant pour le diagnostic et le suivi médical du patient :`)
+    .moveDown();
+
+  doc.moveDown()
+    .fontSize(12)
+    .text(`Type de Scanner : ${typeScanner}`, 50)
+    .text(`Indications cliniques : ${indications}`, 50)
+    .moveDown();
+
+  // Instruction sur les résultats et la communication
+  doc.moveDown()
+    .text(`Le scanner doit être effectué dans un établissement médical approprié et les résultats sont à communiquer au médecin prescripteur dans les plus brefs délais pour évaluation.`)
+    .moveDown();
+
+  // Signature du médecin
+  doc.moveDown(4)
+    .fontSize(12)
+    .text(`Signature du médecin :`, { align: "right" })
+    .text(`Dr. ${medecin.firstName} ${medecin.lastName}`, { align: "right" })
+    .moveDown(2);
+
+  doc.end(); // Finalize the PDF document
+
+  writeStream.on('finish', () => {
+    res.status(200).json({ success: true, message: "Analyse générée avec succès", filePath });
+  });
+
+  writeStream.on('error', (err) => {
+    console.error("Erreur lors de la génération du rapport:", err);
+    res.status(500).json({ success: false, message: "Erreur lors de la génération du rapport" });
+  });
+};
 
   exports.getFileContent = async (req, res) => {
     const { id, fileName } = req.params;
@@ -204,3 +443,4 @@ exports.uploadDocument = (req, res, next) => {
     }
   };
   
+

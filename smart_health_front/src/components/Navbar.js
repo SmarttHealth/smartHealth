@@ -54,7 +54,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('statusCode');
-
+    localStorage.removeItem('ListPatients');
     setUserData(null);
     navigate('/login');
     // Fermez le formulaire
