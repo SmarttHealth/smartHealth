@@ -1,10 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { List, ListItem, ListItemText, Paper, Typography } from '@mui/material';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PhoneIcon from '@mui/icons-material/Phone';
+import CakeIcon from '@mui/icons-material/Cake';
+import HomeIcon from '@mui/icons-material/Home';
+import { usePatients } from './patientsProvider';
 
 
 
-const InfoPatient = ({ client }) => {
+const InfoPatient = ({counter}) => {
+
+  const [currentPatient, setCurrentPatient]=useState();
+  const [show, setShow]=useState(false);
+  const listRDVs = usePatients();
+
+  useEffect(() => {
+    //console.log('la liste des RDVs dans infoPatient ',listRDVs);
+      setCurrentPatient(listRDVs[counter]);
+      if (currentPatient !== undefined){
+        setShow(true);
+      }
+    
+  });
+  
+
   return (
+    show ? (
     <Paper elevation={3} >
       <Typography variant="h5" gutterBottom>
         Données Personnelles
@@ -18,27 +39,33 @@ const InfoPatient = ({ client }) => {
         '& ul': { padding: 0 },
       }}
       subheader={<li />}>
+        
         <ListItem>
-          <ListItemText primary="Name" secondary="Nassima Boubeh" />
+          <PersonOutlineIcon/>
+          <ListItemText primary="firstName" secondary={currentPatient.patient.firstName}/>
         </ListItem>
         <ListItem>
-          <ListItemText primary="Email" secondary="Nassima@gmail.com" />
+          <PersonOutlineIcon/>
+          <ListItemText primary="lastName" secondary={currentPatient.patient.lastName} />
         </ListItem>
         <ListItem>
-          <ListItemText primary="Phone" secondary="0636148232" />
+          <PhoneIcon/>
+          <ListItemText primary="Phone" secondary={currentPatient.patient.phone} />
         </ListItem>
         <ListItem>
-          <ListItemText primary="Email" secondary="Nassima@gmail.com" />
+          <HomeIcon/>
+          <ListItemText primary="address" secondary={currentPatient.patient.address} />
         </ListItem>
         <ListItem>
-          <ListItemText primary="Phone" secondary="0636148232" />
-        </ListItem>
-        <ListItem>
-          <ListItemText primary="Date_naissance" secondary="07-08-2001" />
+          <CakeIcon/>
+          <ListItemText primary="birthday" secondary={currentPatient.patient.birthday} />
         </ListItem>
         {/* Add more ListItem components for additional client information */}
       </List>
     </Paper>
+    ) : (
+      <div></div> // Rendu d'un composant div vide si currentPatient est null ou undefined
+    )
   );
 };
 

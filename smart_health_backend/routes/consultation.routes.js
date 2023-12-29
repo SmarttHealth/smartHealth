@@ -28,5 +28,10 @@ router.use(verifyJWT)
     router.get("/:id",ConController.findConsultation);
     router.delete("/:id", ConController.deleteConsultation);
     router.put("/:id", ConController.updateConsultation);
-    router.post("/:id/documents",multer({ storage }).array("files", 5), ConController.addDocumentsToConsultation)
+    router.get("/medecin/:id_medecin/patient/:id_patient", ConController.getConsultationByIdPatient);
+    router.post("/:id/documents",multer({ storage }).array("files", 5), ConController.addDocumentsToConsultation);
+    router.post("/generateRapport",ConController.generateOrdonnace);
+    router.post("/generateAnalyse",ConController.generateAnalyse);
+    router.post("/generateScanner",ConController.generateScanner);
+
 module.exports = router;

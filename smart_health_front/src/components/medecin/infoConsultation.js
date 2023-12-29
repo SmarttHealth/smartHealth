@@ -1,10 +1,10 @@
 import React from 'react';
 import ConAnciennes from './consAnciennes';
 
-export default function InfoConsultation(){
+export default function InfoConsultation({counter}){
     return (
         <div className="flex flex-col h-full  ">
-                <ConAnciennes/>
+                <ConAnciennes counter={counter}/>
       </div>
       
    
