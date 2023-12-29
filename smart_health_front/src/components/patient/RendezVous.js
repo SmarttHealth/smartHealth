@@ -1,16 +1,17 @@
 import React, { useState,useEffect } from 'react';
 import "../../styles/rendervous.css";
-import axios from 'axios';
 import {  toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { editRDV } from '../Api';
 import { addRDV } from '../Api';
 import { getPatients, getDoctors } from '../Api';
+import moment from 'moment';
+import 'moment/locale/fr';
 
 const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
-  //const patientId = localStorage.getItem('patientId');
+  console.log("rdvvvvvvvvvvvvv: ",appointmentToEdit)
   const patientId=localStorage.getItem("userId");
-  const [selectedAppointmentType, setSelectedAppointmentType] = useState(""); // Utilisez une chaîne au lieu d'un tableau
+  const [selectedAppointmentType, setSelectedAppointmentType] = useState(""); 
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedStartTime, setSelectedStartTime] = useState('');
   const [selectedEndTime, setSelectedEndTime] = useState('');
@@ -18,6 +19,10 @@ const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
   const [selectedPatient, setSelectedPatient] = useState('');
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [edit, setEdit] = useState(false);
+  const [patientid, setPatientid]=useState('');
+  const [doctorid, setDoctorid] = useState('');
+
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -35,10 +40,24 @@ const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
   useEffect(() => {
     // Si appointmentToEdit existe, cela signifie que l'utilisateur veut modifier un rendez-vous
     if (appointmentToEdit) {
+      setEdit(true);
       setSelectedAppointmentType(appointmentToEdit.type);
-      setSelectedDate(appointmentToEdit.date_RDV);
+      setSelectedDate(moment(appointmentToEdit.date_RDV).format('YYYY-MM-DD'));
       setSelectedStartTime(appointmentToEdit.Heure_debut_RDV);
       setSelectedEndTime(appointmentToEdit.Heure_fin_RDV);
+    }
+  }, [appointmentToEdit]);
+
+  useEffect(() => {
+    // Si appointmentToEdit existe, cela signifie que l'utilisateur veut modifier un rendez-vous
+    if (appointmentToEdit) {
+      setEdit(true);
+      setSelectedAppointmentType(appointmentToEdit.type);
+      setSelectedDate(moment(appointmentToEdit.date_RDV).format('YYYY-MM-DD'));
+      setSelectedStartTime(appointmentToEdit.Heure_debut_RDV);
+      setSelectedEndTime(appointmentToEdit.Heure_fin_RDV);
+      setSelectedDoctor(`${appointmentToEdit.medecin.lastName} ${appointmentToEdit.medecin.firstName}`);
+      setSelectedPatient(`${appointmentToEdit.patient.lastName} ${appointmentToEdit.patient.firstName}`);
     }
   }, [appointmentToEdit]);
 
@@ -68,11 +87,18 @@ const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
 
   const handleDoctorChange = (doctor) => {
     setSelectedDoctor(doctor);
+    if (assistant) {
+      // If assistant is true, set the doctorId directly
+      setDoctorid(doctor._id);
+    }
   };
 
   const handlePatientChange = (patient) => {
     setSelectedPatient(patient);
-
+    if (assistant) {
+      // If assistant is true, set the patientId directly
+      setPatientid(patient._id);
+    }
   };
 
   const handleBookNow = async () => {
@@ -81,8 +107,8 @@ const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
       date_RDV: selectedDate,
       Heure_debut_RDV: selectedStartTime,
       Heure_fin_RDV: selectedEndTime,
-      id_patient: patientId,
-      id_medecin: doctorId,
+      id_patient: assistant? patientid: patientId,
+      id_medecin: assistant? doctorid: doctorId,
     };
 
     try {
@@ -139,39 +165,40 @@ const RendezVous = ({ onClose, doctorId,appointmentToEdit, assistant }) => {
           </label>
           </div>
 
-          {assistant && (
-            <div className="grid grid-cols-2 gap-4">
-               {/* Select a doctor */}
-          <div>
-            <select
-              className="mt-2 px-2 py-1 border rounded-lg w-full text-xs"
-              value={selectedDoctor}
-              onChange={(e) => handleDoctorChange(e.target.value)}
-            >
-              <option value="">Select doctor</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.lastName} {doctor.firstName}
-                </option>
-              ))}
-            </select>
-          </div>
+          {(assistant || edit) && (
+          <div className="grid grid-cols-2 gap-4">
+            {/* Select a doctor */}
+            <div>
+              <select
+                className="mt-2 px-2 py-1 border rounded-lg w-full text-xs"
+                value={selectedDoctor}
+                onChange={(e) => handleDoctorChange(e.target.value)}
+              >
+                <option value="">Select doctor</option>
+                {doctors.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.lastName} {doctor.firstName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
 
           {/* Select a patient */}
           <div>
-            <select
-              className="mt-2 px-2 py-1 border rounded-lg w-full text-xs"
-              value={selectedPatient}
-              onChange={(e) => handlePatientChange(e.target.value)}
-            >
-              <option value="">Select patient</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.lastName} {patient.firstName}
-                </option>
-              ))}
-            </select>
-          </div>
+              <select
+                className="mt-2 px-2 py-1 border rounded-lg w-full text-xs"
+                value={selectedPatient}
+                onChange={(e) => handlePatientChange(e.target.value)}
+              >
+                <option value="">Select patient</option>
+                {patients.map((patient) => (
+                  <option key={patient.id} value={patient.id}>
+                    {patient.lastName} {patient.firstName}
+                  </option>
+                ))}
+              </select>
+            </div>
             </div>
           )}
 

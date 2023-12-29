@@ -198,6 +198,16 @@ apiJWT.interceptors.request.use(request=>{
         return apiJWT.get('/RDV/rdvs');
     };
 
+    export const checkAvailability = async (availabilityData) => {
+        try {
+          const response = await apiJWT.post('/RDV/checkAvailability', availabilityData);
+          return response.data;
+        } catch (error) {
+          console.error('Erreur lors de la vérification de la disponibilité:', error);
+          throw error;
+        }
+      };
+
     export const addRDV = (rdvDto) => {
         return apiJWT.post('/RDV', rdvDto);
     };

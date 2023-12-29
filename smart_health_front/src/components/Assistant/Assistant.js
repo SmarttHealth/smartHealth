@@ -17,7 +17,7 @@ const Assistant = () => {
 
 
       <Navbar/>
-      <Sidebar/>
+      {/* <Sidebar/> */}
       <div class="h-full ml-20 mt-20 mb-10 md:ml-64">
         <StatisticsCard/>
         </div>
