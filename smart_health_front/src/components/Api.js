@@ -170,7 +170,10 @@ apiJWT.interceptors.request.use(request=>{
         return apiJWT.delete(`/consultation/${consultationId}`);
     } 
     export const getConsultationParPatient=(patientId)=>{
-        return apiJWT.get(`/consultation//patient/${patientId}`)
+        return apiJWT.get(`/consultation/patient/${patientId}`)
+    }
+    export const getCountConsultationParPatient=(patientId)=>{
+        return apiJWT.get(`/consultation/countConsultation/${patientId}`)
     }
 
     export const addDocumentsToConsultation = (consultationId, files) => {
@@ -216,6 +219,10 @@ apiJWT.interceptors.request.use(request=>{
    
     export const  getRDVParPatient=(patientId)=>{
         return apiJWT.get(`/RDV/rdvPatient/${patientId}`);
+
+    } 
+    export const  getRdvCountByPatientId=(patientId)=>{
+        return apiJWT.get(`/RDV/countRDV/${patientId}`);
 
     } 
     
