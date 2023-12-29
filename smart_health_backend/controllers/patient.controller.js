@@ -11,7 +11,7 @@ exports.findAll = (req, res) =>{
     .catch(err => console.log(err))
 }
 
-exports.findUser = (req, res) => {
+exports.findPatient = (req, res) => {
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({
             error: 'given Object id is not valid : '+ req.params.id
@@ -65,39 +65,100 @@ exports.addUser =async (req, res) => {
     }
 }
 
-exports.updateUser =async (req, res) =>{
-    if(ObejectId.isValid(req.params.id) == false)
+exports.updateUser = async (req, res) => {
+    if (!ObejectId.isValid(req.params.id)) {
         res.status(400).json({
-            error: 'given Object id is not valid : '+ req.params.id
-        })
-    else{
-        const { email, password, birthday } = req.body
-        const dateString = birthday;
-        const parts = dateString.split('/'); // Séparer la chaîne par "/"
-        const day = parseInt(parts[0], 10); // Récupérer le jour
-        const month = parseInt(parts[1], 10) - 1; // Récupérer le mois (soustraire 1 car les mois commencent à 0)
-        const year = parseInt(parts[2], 10); // Récupérer l'année
+            error: 'Given Object id is not valid: ' + req.params.id
+        });
+    } else {
+        try {
+            const { email, password, birthday } = req.body;
+            const dateString = birthday;
+            const parts = dateString.split('/'); // Séparer la chaîne par "/"
+            const day = parseInt(parts[0], 10); // Récupérer le jour
+            const month = parseInt(parts[1], 10) - 1; // Récupérer le mois (soustraire 1 car les mois commencent à 0)
+            const year = parseInt(parts[2], 10); // Récupérer l'année
 
-        // Créer un objet Date avec les parties extraites
-        const birthdayy = new Date(year, month, day);
-        const patientData = {
-            ...req.body,
-            birthday: birthdayy
-        }; 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
-        const cptData = {email, "password": hashedPassword}
+            // Créer un objet Date avec les parties extraites
+            const birthdayy = new Date(year, month, day);
+            const patientData = {
+                ...req.body,
+                birthday: birthdayy
+            }; 
 
-        UserCrud.findByIdAndUpdate(req.params.id, patientData)
-        .then(data => {
-             const cpt = CompteCrud.findByIdAndUpdate(data.id_compte, cptData).exec()
-            res.json(data)
-        })
-           
-        .catch(err => console.log(err))
+            if (password) {
+                // Si un nouveau mot de passe est fourni, générer un nouveau hash de mot de passe
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+                const cptData1 = { email, password: hashedPassword };
+
+                const userUpdatePromise = UserCrud.findByIdAndUpdate(req.params.id, patientData).exec();
+                const cptUpdatePromise = CompteCrud.findByIdAndUpdate(userUpdatePromise.id_compte, cptData1).exec();
+
+                // Attendre la mise à jour des deux documents
+                const [userData, cptData] = await Promise.all([userUpdatePromise, cptUpdatePromise]);
+
+                res.json(userData);
+            } else {
+                // Si aucun nouveau mot de passe n'est fourni, mettre à jour uniquement les autres informations
+                const userData = await UserCrud.findByIdAndUpdate(req.params.id, patientData).exec();
+                res.json(userData);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
     }
-}
+};
+exports.updateUser = async (req, res) => {
+    if (!ObejectId.isValid(req.params.id)) {
+        res.status(400).json({
+            error: 'Given Object id is not valid: ' + req.params.id
+        });
+    } else {
+        try {
+            const { email, password, birthday } = req.body;
+            const dateString = birthday;
+            const parts = dateString.split('/');
 
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+
+            // Vérifier si la date est valide
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                const birthdayy = new Date(year, month, day);
+                const patientData = {
+                    ...req.body,
+                    birthday: birthdayy
+                };
+
+                if (password) {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashedPassword = await bcrypt.hash(password, salt);
+                    const cptData1 = { email, password: hashedPassword };
+
+                    const userUpdatePromise = UserCrud.findByIdAndUpdate(req.params.id, patientData).exec();
+                    const cptUpdatePromise = CompteCrud.findByIdAndUpdate(userUpdatePromise.id_compte, cptData1).exec();
+
+                    const [userData, cptData] = await Promise.all([userUpdatePromise, cptUpdatePromise]);
+
+                    res.json(userData);
+                } else {
+                    const userData = await UserCrud.findByIdAndUpdate(req.params.id, patientData).exec();
+                    res.json(userData);
+                }
+            } else {
+                res.status(400).json({
+                    error: 'Invalid date format'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+};
 exports.deleteUser = (req, res) =>{
     if(ObejectId.isValid(req.params.id) == false)
         res.status(400).json({

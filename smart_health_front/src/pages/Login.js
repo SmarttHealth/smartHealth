@@ -1,8 +1,9 @@
 import React,{useState} from 'react';
-import  axios  from 'axios';
 import {useNavigate} from 'react-router-dom'
 import hospitalBackground from '../images/bg_login.jpg';
+
 import {login} from '../components/Api'
+
 export default function Login() {
     const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +18,8 @@ export default function Login() {
       
       //localStorage.setItem('statusCode', response.status);
       localStorage.setItem('user', JSON.stringify(response.data.userData));
+      localStorage.setItem('userId',response.data.userData._id);
+      console.log("userId",response.data.userData._id);
       // Navigate based on user role
       switch (response.data.userData.role) {
         case 'Patient':

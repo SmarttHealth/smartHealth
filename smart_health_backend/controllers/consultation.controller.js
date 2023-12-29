@@ -3,8 +3,13 @@ const Consultation = require("../models/consultation.model")
 const Patient = require("../models/patient.model")
 const Medecin = require("../models/medecin.model")
 const ObejectId = require("mongoose").Types.ObjectId
+
 const fs = require("fs");
 const PDFDocument = require("pdfkit-table");
+
+
+const fss = require('fs').promises;
+const path = require('path');
 
 
 
@@ -149,6 +154,7 @@ exports.uploadDocument = (req, res) => {
   
     return res.status(200).json({ success: true, fileNames });
   };
+
 
 
 exports.getConsultationByIdPatient = (req, res) => {
@@ -381,3 +387,60 @@ exports.generateScanner = (req, res) => {
     res.status(500).json({ success: false, message: "Erreur lors de la génération du rapport" });
   });
 };
+
+  exports.getFileContent = async (req, res) => {
+    const { id, fileName } = req.params;
+    console.log("id de consultatin 888888888888: ",fileName)
+  
+    try {
+      // Assuming your files are stored in a specific directory
+      const filePath = path.join(__dirname, '../../../smartHealth/smart_health_front/public/documents', fileName);
+      console.log("path$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4 ",filePath)
+      // Read the content of the file
+      const fileContent = await fs.readFile(filePath, 'base64');
+      res.status(200).json({ content: fileContent });
+    } catch (error) {
+      console.error('Error reading file content:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+  exports.findConsultationsByPatient = async (req, res) => {
+    try {
+      const patientId = req.params.id; // Ajoutez la récupération de l'ID du patient depuis les paramètres de la requête
+      const consultations = await Consultation.find({ id_patient: patientId });
+  
+      const consultationsWithDetails = [];
+  
+      for (const consultation of consultations) {
+        const patient = await Patient.findById(consultation.id_patient);
+        const medecin = await Medecin.findById(consultation.id_medecin);
+  
+        consultationsWithDetails.push({
+          ...consultation._doc,
+          patient: patient ? { id: patient._id, firstName: patient.firstName, lastName: patient.lastName } : null,
+          medecin: medecin ? { id: medecin._id, firstName: medecin.firstName, lastName: medecin.lastName } : null,
+        });
+      }
+  
+      res.status(200).json(consultationsWithDetails);
+      console.log("response pour getter les consultations par id Patient",res);
+    } catch (err) {
+      console.error('Error fetching consultations:', err);
+      res.status(500).json({ error: 'Erreur lors de la récupération des consultations' });
+    }
+  };
+  
+  exports.getCountByPatientId = async (req, res) => {
+    try {
+      const patientId = req.params.id; 
+      const consultationCount = await Consultation.countDocuments({ id_patient: patientId });
+  
+      res.status(200).json({ count: consultationCount });
+    } catch (err) {
+      console.error('Error fetching consultation count:', err);
+      res.status(500).json({ error: 'Erreur lors de la récupération du nombre de consultations' });
+    }
+  };
+  
+

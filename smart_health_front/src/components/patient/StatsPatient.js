@@ -1,6 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getCountConsultationParPatient, getRdvCountByPatientId } from '../Api';
 
 const StatsPatient = () => {
+  const [consultationCount, setConsultationCount] = useState('');
+  const [rdvCount, setRdvCount] = useState('');
+  const patientId = localStorage.getItem('userId');
+
+  const fetchConsultationCount = async (patientId) => {
+    try {
+      const response = await getCountConsultationParPatient(patientId);
+      setConsultationCount(response.data.count);
+      console.log('Nombre de consultations pour le patient :', consultationCount);
+    } catch (error) {
+      console.error('Erreur lors de la récupération du nombre de consultations :', error);
+    }
+  };
+
+  const fetchRdvCountByPatientId = async (patientId) => {
+    try {
+      const response = await getRdvCountByPatientId(patientId);
+      setRdvCount(response.data.rdvCount);
+      console.log('Nombre de rendez-vous pour le patient :', rdvCount);
+    } catch (error) {
+      console.error('Erreur lors de la récupération du nombre de rendez-vous :', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConsultationCount(patientId);
+    fetchRdvCountByPatientId(patientId);
+  }, [patientId]);
   return (
     <div>
       <div className="m-6">
@@ -17,7 +46,7 @@ const StatsPatient = () => {
               </div>
 
               <div className="mx-5">
-                <h4 className="text-2xl font-semibold text-gray-700">27</h4>
+                <h4 className="text-2xl font-semibold text-gray-700">{consultationCount}</h4>
                 <div className="text-gray-500">Consultations</div>
               </div>
             </div>
@@ -35,7 +64,7 @@ const StatsPatient = () => {
               </div>
 
               <div className="mx-5">
-                <h4 className="text-2xl font-semibold text-gray-700">27</h4>
+                <h4 className="text-2xl font-semibold text-gray-700">{rdvCount}</h4>
                 <div className="text-gray-500">Rendez-vous</div>
               </div>
             </div>

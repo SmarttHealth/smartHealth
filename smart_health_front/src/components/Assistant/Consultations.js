@@ -1,6 +1,11 @@
   import React, { useState, useEffect, useRef } from 'react';
-  import axios from 'axios';
-  import { getConsultationsDetails, getDoctors, getPatients, getPatientsInactives } from '../Api';
+  import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+  import { getConsultationsDetails, getDoctors, getPatients, getPatientsInactives,
+     addDocumentsToConsultation, readFileContent, editConsultation } from '../Api';
+  import ModalDoc from './ModalDoc';
+  import DocumentViewer from './DocumentViewer';
+  import { CustomAlert } from './CustomAlert';
 
   const Consultations = () => {
     const [doctors, setDoctors] = useState([]);
@@ -8,15 +13,67 @@
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [consultations, setConsultations] = useState(null);
     const [filteredConsultations, setFilteredConsultations] = useState(null);
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedConsultationDocuments, setSelectedConsultationDocuments] = useState([]);
 
 
     const [patients, setPatients] = useState([]);
     const [isPatientDropdownOpen, setIsPatientDropdownOpen] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedDocumentContent, setSelectedDocumentContent] = useState(null);
+    const [cancelConfirmation, setCancelConfirmation] = useState({ isOpen: false, consultationId: null });
 
+
+  const handleCancelConsultation = async (consultationId) => {
+    // Open the confirmation modal
+    setCancelConfirmation({ isOpen: true, consultationId });
+  };
+
+  const handleConfirmCancel = async () => {
+    try {
+      // Close the confirmation modal
+      setCancelConfirmation({ isOpen: false, consultationId: null });
+
+      // Update the consultation to mark it as canceled
+      await editConsultation(cancelConfirmation.consultationId, { etat: 'Canceled' });
+
+      // Update the state to reflect the change
+      setFilteredConsultations((prevConsultations) =>
+        prevConsultations.map((consultation) =>
+          consultation._id === cancelConfirmation.consultationId
+            ? { ...consultation, etat: 'Canceled' }
+            : consultation
+        )
+      );
+    } catch (error) {
+      console.error('Error canceling consultation:', error);
+    }
+  };
+
+  const handleCancelCancel = () => {
+    // Close the confirmation modal without canceling the consultation
+    setCancelConfirmation({ isOpen: false, consultationId: null });
+  };
+
+    const handleDocumentClick = async (consultationId,document) => {
+      try {
+        const fileContent = await readFileContent(consultationId,document);
+        console.log("contenu ***********************: ",fileContent)
+        setSelectedDocumentContent(fileContent);
+        setIsModalOpen(true);
+      } catch (error) {
+        console.error('Error reading document content:', error);
+      }
+    };
     const fileInputRef = useRef(null);
-
+    
+    const handleSeeAllClick = (documents) => {
+      setSelectedConsultationDocuments(documents);
+      setIsModalOpen(true);
+    };
+    // Function to generate unique IDs like "R001," "R002," etc.
+  const generateID = (index, totalCslts) => {
+    return `C${(index + 1).toString().padStart(totalCslts.toString().length, '0')}`;
+  };
 
 
     useEffect(() => {
@@ -96,30 +153,21 @@
     };
     const handleFileSelect = (consultation, file) => {
       if (file) {
-        const formData = new FormData();
-        formData.append('files', file);
-    
-        axios
-          .post(`http://localhost:8082/api/consultation/${consultation._id}/documents`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          })
-          .then((response) => {
-            console.log('File uploaded successfully:', response.data);
-          })
-          .catch((error) => {
-            console.error('Error uploading file:', error);
-          });
+        console.log("ccccccccccc: ",consultation.patient)
+          addDocumentsToConsultation(consultation._id, file)
+              .then((response) => {
+                  console.log('File uploaded successfully:', response.data);
+                  // Effectuez d'autres opérations si nécessaire
+              })
+              .catch((error) => {
+                  console.error('Error uploading file:', error);
+              });
       }
-    };
-    
+  };
 
-    
-    
     return (
       <div class="mt-4 mx-4">
-              <div class=" ml-60 overflow-hidden rounded-lg shadow-xs">
+              <div class=" ml-60 overflow-hidden rounded-lg shadow-xs shadow-lg">
                 <div class="w-full overflow-x-auto">
                 <div className="flex items-center justify-between py-3 px-2 bg-gray-50">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">Consultations</h2>
@@ -163,13 +211,15 @@
                         <th class="px-4 py-3">Patient</th>
                         <th class="px-4 py-3">Etat</th>
                         <th class="px-4 py-3">Documents</th>
+                        <th class="px-4 py-3">Actions</th>
+
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
                     {filteredConsultations !== null && filteredConsultations.length > 0 ? (
                       filteredConsultations.map((consultation, index) => (
                         <tr key={consultation._id} className="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
-                          <td className="px-2 py-3 text-sm">{consultation._id}</td>
+                          <td className="px-4 py-3 text-sm">{generateID(index, filteredConsultations.length)}</td>
                           <td>{consultation.date_creation.slice(0, 10)} at {consultation.heure_creation}</td>
                           <td>{consultation.patient.lastName} {consultation.patient.firstName}</td>
                           <td>
@@ -186,44 +236,50 @@
                             )}
                           </td>
                           <td>
-                            {consultation.documents.length > 0 && (
-                              <>
-                                <button
-                                  key={0}
-                                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
-                                  // Ajoutez votre gestionnaire de clic ici
-                                >
-                                  {consultation.documents[0].substring(14)}
-                                </button>
-                                {consultation.documents.length > 1 && (
-                                  <>
-                                    <button
-                                      className="text-blue-500 hover:underline focus:outline-none mr-2"
-                                      // Add your click handler for "See All" button here
-                                    >
-                                      See All
-                                    </button>
-                                    
-
-                                  </>
-                                )}
-                                <button
-                                            className="bg-green-500 text-white rounded p-2"
-                                            onClick={() => {
-                                              fileInputRef.current.click();
-                                            }}
-                                          >
-                                            +
-                                          </button>
-                                          <input
-                                            type="file"
-                                            accept=".pdf,.doc,.docx"
-                                            onChange={(e) => handleFileSelect(consultation, e.target.files[0])}
-                                            style={{ display: 'none' }}
-                                            ref={fileInputRef}
-                                          />
-                              </>
-                            )}
+              {consultation.documents.length > 0 && (
+                <>
+                  <button
+                    key={0}
+                    className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                    onClick={() => handleDocumentClick(consultation._id, consultation.documents[0])}
+                  >
+                    {consultation.documents[0].substring(14)}
+                  </button>
+                  {consultation.documents.length > 1 && (
+                    <>
+                      <button
+                        className="text-blue-500 hover:underline focus:outline-none mr-2"
+                        onClick={() => handleSeeAllClick(consultation.documents)}
+                      >
+                        See All
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+              <button
+              className="bg-green-500 text-white rounded p-2"
+              onClick={() => {
+                fileInputRef.current.click();
+              }}
+              >
+                +
+              </button>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => handleFileSelect(consultation, e.target.files[0])}
+                style={{ display: 'none' }}
+                ref={fileInputRef}
+                />
+              </td>
+                          <td>
+                          <button
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() => handleCancelConsultation(consultation._id)}
+                    >
+                      <FontAwesomeIcon icon={faTimesCircle} />
+                    </button>
                           </td>
                         </tr>
                         ))
@@ -243,11 +299,32 @@
                       </tbody>
 
                       </table>
-                      </div>
-                
-                    </div>
-                  </div>
-                    )
-                  }
+                      {/* {isModalOpen && (
+        <ModalDoc
+          documents={selectedConsultationDocuments}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )} */}
+      {isModalOpen && (
+        <DocumentViewer
+          content={selectedDocumentContent}
+          onClose={() => {
+            setSelectedDocumentContent(null);
+            setIsModalOpen(false);
+          }}
+        />
+      )}
+      {cancelConfirmation.isOpen && (
+          <CustomAlert
+            message="Are you sure you want to cancel this consultation?"
+            onConfirm={handleConfirmCancel}
+            onCancel={handleCancelCancel}
+          />
+        )}
+      </div>
+      </div>
+    </div>
+    )
+  }
 
   export default Consultations

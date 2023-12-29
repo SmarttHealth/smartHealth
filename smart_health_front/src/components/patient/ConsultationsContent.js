@@ -1,15 +1,16 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { getConsultationParPatient, getDoctor } from "../Api";
 
 const ConsultationsContent = () => {
   const [consultations, setConsultations] = useState([]);
   const [medecins, setMedecins] = useState({});
-
+  const patientId=localStorage.getItem("userId");
   useEffect(() => {
     const fetchConsultations = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/consultation/');
+        const response = await getConsultationParPatient(patientId);
         console.log("consultations", response.data);
         setConsultations(response.data);
       } catch (error) {
@@ -23,7 +24,7 @@ const ConsultationsContent = () => {
   useEffect(() => {
     const fetchMedecin = async (idMedecin) => {
       try {
-        const response = await axios.get(`http://localhost:8082/api/users/medecin/${idMedecin}`);
+        const response = await getDoctor(idMedecin);
         console.log("medecin", response.data);
         setMedecins((prevMedecins) => ({ ...prevMedecins, [idMedecin]: response.data }));
       } catch (error) {
@@ -48,7 +49,7 @@ const ConsultationsContent = () => {
                 <div className="flex items-center gap-x-3">
                   <input type="checkbox" className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700" />
                   <button className="flex items-center gap-x-2">
-                    <span>ID Médecin</span>
+                    <span>Médecin</span>
                     <svg className="h-3" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M2.13347 0.0999756H2.98516L5.01902 4.79058H3.86226L3.45549 3.79907H1.63772L1.24366 4.79058H0.0996094L2.13347 0.0999756ZM2.54025 1.46012L1.96822 2.92196H3.11227L2.54025 1.46012Z" fill="currentColor" stroke="currentColor" strokeWidth="0.1" />
                       <path d="M0.722656 9.60832L3.09974 6.78633H0.811638V5.87109H4.35819V6.78633L2.01925 9.60832H4.43446V10.5617H0.722656V9.60832Z" fill="currentColor" stroke="currentColor" strokeWidth="0.1" />

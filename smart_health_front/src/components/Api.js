@@ -138,6 +138,9 @@ apiJWT.interceptors.request.use(request=>{
     export const editService = (serviceId, serviceDto) => {
         return apiJWT.put(`/service/${serviceId}`, serviceDto);
     }
+    export const getServiceForDoctor=(doctorId)=>{
+        return apiJWT.get(`/service/serviceDoctor/${doctorId}`);
+    }
         
     export const deleteService = (serviceId) => {
         return apiJWT.delete(`/service/${serviceId}`);
@@ -154,7 +157,7 @@ apiJWT.interceptors.request.use(request=>{
     export const addConsultation = ( consultationDto) => {
         return apiJWT.post('/consultation', consultationDto);
     };
-      
+    
     export const getConsultation = (consultationId) =>{
         return apiJWT.get(`/consultation/${consultationId}`);
     };
@@ -166,13 +169,27 @@ apiJWT.interceptors.request.use(request=>{
     export const deleteConsultation = (consultationId) => {
         return apiJWT.delete(`/consultation/${consultationId}`);
     } 
+    export const getConsultationParPatient=(patientId)=>{
+        return apiJWT.get(`/consultation/patient/${patientId}`)
+    }
+    export const getCountConsultationParPatient=(patientId)=>{
+        return apiJWT.get(`/consultation/countConsultation/${patientId}`)
+    }
 
     export const addDocumentsToConsultation = (consultationId, files) => {
         const formData = new FormData();
-        formData.append("files", files);
+        formData.append('files', files);
     
-        return apiJWT.post(`/consultation/${consultationId}/documents`, formData);
+        return apiJWT.post(`/consultation/${consultationId}/documents`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     };
+    export const readFileContent = (consultationId, fileName) => {
+        return apiJWT.get(`/consultation/${consultationId}/documents/${fileName}`);
+      };
+      
 
     export const getConsultationByPatAndMed = (id_patient, id_medecin) =>{
         return apiJWT.get(`/consultation/medecin/${id_medecin}/patient/${id_patient}`,);
@@ -199,7 +216,18 @@ apiJWT.interceptors.request.use(request=>{
     export const getRDVsDetails = () =>{
         return apiJWT.get('/RDV/rdvs');
     };
-    export const addRDV = ( rdvDto) => {
+
+    export const checkAvailability = async (availabilityData) => {
+        try {
+          const response = await apiJWT.post('/RDV/checkAvailability', availabilityData);
+          return response.data;
+        } catch (error) {
+          console.error('Erreur lors de la vérification de la disponibilité:', error);
+          throw error;
+        }
+      };
+
+    export const addRDV = (rdvDto) => {
         return apiJWT.post('/RDV', rdvDto);
     };
       
@@ -214,10 +242,25 @@ apiJWT.interceptors.request.use(request=>{
     export const deleteRDV = (rdvId) => {
         return apiJWT.delete(`/RDV/${rdvId}`);
     } 
+
        
     export const getPatientsWithAppointmentsTodayByStatus = (id_medecin, etat) =>{
         return apiJWT.get(`/RDV/medecin/${id_medecin}/etat/${etat}`);
     }
+
+   
+    export const  getRDVParPatient=(patientId)=>{
+        return apiJWT.get(`/RDV/rdvPatient/${patientId}`);
+
+    } 
+    export const  getRdvCountByPatientId=(patientId)=>{
+        return apiJWT.get(`/RDV/countRDV/${patientId}`);
+
+    } 
+    
+    
+
+
 
 
 
